@@ -49,4 +49,17 @@ class AuthApiTest extends ApiTestBase {
         assertThat(DbFixtures.text("SELECT address_city FROM customers WHERE id = ?", customerId))
                 .isEqualTo(address.get("city"));
     }
+
+    @Test
+    @DisplayName("aceita CPF com pontuação no cadastro e grava só os dígitos")
+    void shouldNormalizeFormattedCpf() {
+        Map<String, Object> body = FakeData.registerRequest();
+        String cpf = (String) body.get("cpf");
+        body.put("cpf", FakeData.formattedCpf(cpf));
+
+        String customerId = anonymous().body(body).when().post("/register")
+                .then().statusCode(201).extract().path("customerId");
+
+        assertThat(DbFixtures.text("SELECT cpf FROM customers WHERE id = ?", customerId)).isEqualTo(cpf);
+    }
 }
