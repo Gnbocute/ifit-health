@@ -301,4 +301,12 @@ class AuthApiTest extends ApiTestBase {
     void shouldRequireTokenOnMe() {
         anonymous().when().get("/auth/me").then().statusCode(401);
     }
+
+    @Test
+    @DisplayName("retorna 401 em /auth/me com token inválido")
+    void shouldRejectInvalidToken() {
+        as("invalid.token.value").when().get("/auth/me")
+                .then().statusCode(401)
+                .body("error", equalTo("JWT is not valid or is expired."));
+    }
 }
