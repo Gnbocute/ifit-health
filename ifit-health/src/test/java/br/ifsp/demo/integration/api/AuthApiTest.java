@@ -160,4 +160,15 @@ class AuthApiTest extends ApiTestBase {
                 .then().statusCode(201)
                 .body("customerId", equalTo(customerId.toString()));
     }
+
+    @Test
+    @DisplayName("retorna 409 no cadastro quando o CPF pertence a cliente com outro e-mail")
+    void shouldRejectCpfOfCustomerWithAnotherEmail() {
+        Map<String, Object> body = FakeData.registerRequest();
+        DbFixtures.insertCustomer("Cliente Balcao", (String) body.get("cpf"), FakeData.email());
+
+        anonymous().body(body).when().post("/register")
+                .then().statusCode(409)
+                .body("message", equalTo("O CPF já está cadastrado com outro e-mail. Procure a administração."));
+    }
 }
