@@ -171,4 +171,13 @@ class AuthApiTest extends ApiTestBase {
                 .then().statusCode(409)
                 .body("message", equalTo("O CPF já está cadastrado com outro e-mail. Procure a administração."));
     }
+
+    @Test
+    @DisplayName("retorna 400 no cadastro para CPF com dígito verificador inválido")
+    void shouldRejectCpfWithInvalidCheckDigits() {
+        Map<String, Object> body = FakeData.registerRequest();
+        body.put("cpf", "11111111111");
+
+        anonymous().body(body).when().post("/register").then().statusCode(400);
+    }
 }
