@@ -317,4 +317,10 @@ class AuthApiTest extends ApiTestBase {
                 .then().statusCode(200)
                 .body(equalTo("Hello: " + SeedData.ADMIN_USER_ID));
     }
+
+    @Test
+    @DisplayName("retorna 401 em /hello sem token")
+    void shouldRequireTokenOnHello() {
+        anonymous().when().get("/hello").then().statusCode(401);
+    }
 }
