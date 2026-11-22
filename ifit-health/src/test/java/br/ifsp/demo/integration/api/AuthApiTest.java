@@ -231,4 +231,13 @@ class AuthApiTest extends ApiTestBase {
                 .contentType(ContentType.JSON)
                 .body("token", matchesPattern("^[\\w-]+\\.[\\w-]+\\.[\\w-]+$"));
     }
+
+    @Test
+    @DisplayName("autentica ignorando maiúsculas e espaços no e-mail")
+    void shouldAuthenticateWithNormalizedEmail() {
+        anonymous().body(Map.of("username", "  ADMIN@IFIT.COM ", "password", SeedData.ADMIN_PASSWORD))
+                .when().post("/authenticate")
+                .then().statusCode(200)
+                .body("token", not(emptyOrNullString()));
+    }
 }
