@@ -35,4 +35,18 @@ class AuthApiTest extends ApiTestBase {
         assertThat(DbFixtures.text("SELECT user_id FROM customers WHERE id = ?", response.path("customerId").toString()))
                 .isEqualTo(userId.toString());
     }
+
+    @Test
+    @DisplayName("grava o endereço quando ele é informado no cadastro")
+    void shouldRegisterStudentWithAddress() {
+        Map<String, Object> body = FakeData.registerRequest();
+        Map<String, Object> address = FakeData.address();
+        body.put("address", address);
+
+        String customerId = anonymous().body(body).when().post("/register")
+                .then().statusCode(201).extract().path("customerId");
+
+        assertThat(DbFixtures.text("SELECT address_city FROM customers WHERE id = ?", customerId))
+                .isEqualTo(address.get("city"));
+    }
 }
