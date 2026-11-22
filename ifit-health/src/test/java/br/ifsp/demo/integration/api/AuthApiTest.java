@@ -256,4 +256,12 @@ class AuthApiTest extends ApiTestBase {
                 .when().post("/authenticate")
                 .then().statusCode(401);
     }
+
+    @Test
+    @DisplayName("retorna 401 ao autenticar com e-mail desconhecido")
+    void shouldRejectUnknownEmail() {
+        anonymous().body(Map.of("username", FakeData.email(), "password", FakeData.password()))
+                .when().post("/authenticate")
+                .then().statusCode(401);
+    }
 }
