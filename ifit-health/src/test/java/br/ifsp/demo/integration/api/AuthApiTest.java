@@ -248,4 +248,12 @@ class AuthApiTest extends ApiTestBase {
 
         assertThat(student.token()).isNotBlank();
     }
+
+    @Test
+    @DisplayName("retorna 401 ao autenticar com senha errada")
+    void shouldRejectWrongPassword() {
+        anonymous().body(Map.of("username", SeedData.ADMIN_EMAIL, "password", FakeData.password()))
+                .when().post("/authenticate")
+                .then().statusCode(401);
+    }
 }
