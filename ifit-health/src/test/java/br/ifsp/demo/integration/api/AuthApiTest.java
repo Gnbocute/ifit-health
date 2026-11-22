@@ -264,4 +264,10 @@ class AuthApiTest extends ApiTestBase {
                 .when().post("/authenticate")
                 .then().statusCode(401);
     }
+
+    @Test
+    @DisplayName("retorna 400 ao autenticar sem usuário e senha")
+    void shouldRejectEmptyBody() {
+        anonymous().body("{}").when().post("/authenticate").then().statusCode(400);
+    }
 }
