@@ -7,9 +7,13 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -74,5 +78,39 @@ class AuthApiTest extends ApiTestBase {
                 .then().statusCode(201).extract().path("userId");
 
         assertThat(DbFixtures.text("SELECT email FROM app_user WHERE id = ?", userId)).isEqualTo(email.toLowerCase());
+    }
+
+    static Stream<Arguments> invalidFields() {
+        return Stream.of(
+                Arguments.of("name", "   "),
+                Arguments.of("name", "a".repeat(101)),
+                Arguments.of("lastname", ""),
+                Arguments.of("email", "not-an-email"),
+                Arguments.of("email", null),
+                Arguments.of("password", "1234567"),
+                Arguments.of("password", "a".repeat(73)),
+                Arguments.of("cpf", "123"),
+                Arguments.of("cpf", "abc.def.ghi-jk"),
+                Arguments.of("birthdate", FakeData.futureDate().toString()),
+                Arguments.of("birthdate", null),
+                Arguments.of("gender", null),
+                Arguments.of("tel", "1".repeat(21)));
+    }
+
+    @ParameterizedTest(name = "[{index}] {0} = {1}")
+    @MethodSource("invalidFields")
+    @DisplayName("retorna 400 e identifica o campo inválido no cadastro")
+    void shouldRejectInvalidField(String field, Object value) {
+        Map<String, Object> body = FakeData.registerRequest();
+        body.put(field, value);
+
+        anonymous().body(body).when().post("/register")
+                .then().statusCode(400)
+                .contentType(ContentType.JSON)
+                .body("status", equalTo(400))
+                .body("message", equalTo("Existem campos inválidos no cadastro."))
+                .body("errors." + field, not(emptyOrNullString()));
+
+        assertThat(DbFixtures.count("SELECT COUNT(*) FROM app_user")).isEqualTo(2);
     }
 }
