@@ -138,4 +138,15 @@ class AuthApiTest extends ApiTestBase {
                 .then().statusCode(409)
                 .body("message", equalTo("Este e-mail já está cadastrado."));
     }
+
+    @Test
+    @DisplayName("retorna 409 no cadastro quando o CPF já está vinculado a uma conta")
+    void shouldRejectDuplicatedCpf() {
+        Map<String, Object> body = FakeData.registerRequest();
+        body.put("cpf", SeedData.ANA_CPF);
+
+        anonymous().body(body).when().post("/register")
+                .then().statusCode(409)
+                .body("message", equalTo("Este CPF já está associado a uma conta."));
+    }
 }
