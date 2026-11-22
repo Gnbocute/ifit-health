@@ -62,4 +62,17 @@ class AuthApiTest extends ApiTestBase {
 
         assertThat(DbFixtures.text("SELECT cpf FROM customers WHERE id = ?", customerId)).isEqualTo(cpf);
     }
+
+    @Test
+    @DisplayName("grava o e-mail do cadastro em minúsculas")
+    void shouldNormalizeEmail() {
+        Map<String, Object> body = FakeData.registerRequest();
+        String email = (String) body.get("email");
+        body.put("email", email.toUpperCase());
+
+        String userId = anonymous().body(body).when().post("/register")
+                .then().statusCode(201).extract().path("userId");
+
+        assertThat(DbFixtures.text("SELECT email FROM app_user WHERE id = ?", userId)).isEqualTo(email.toLowerCase());
+    }
 }
