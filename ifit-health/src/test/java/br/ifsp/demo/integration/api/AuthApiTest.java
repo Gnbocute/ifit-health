@@ -309,4 +309,12 @@ class AuthApiTest extends ApiTestBase {
                 .then().statusCode(401)
                 .body("error", equalTo("JWT is not valid or is expired."));
     }
+
+    @Test
+    @DisplayName("cumprimenta o usuário autenticado com o id em /hello")
+    void shouldGreetAuthenticatedUser() {
+        asAdmin().when().get("/hello")
+                .then().statusCode(200)
+                .body(equalTo("Hello: " + SeedData.ADMIN_USER_ID));
+    }
 }
