@@ -149,4 +149,15 @@ class AuthApiTest extends ApiTestBase {
                 .then().statusCode(409)
                 .body("message", equalTo("Este CPF já está associado a uma conta."));
     }
+
+    @Test
+    @DisplayName("vincula a conta ao cliente criado pela administração com o mesmo CPF e e-mail")
+    void shouldLinkExistingCustomerWithoutAccount() {
+        Map<String, Object> body = FakeData.registerRequest();
+        UUID customerId = DbFixtures.insertCustomer("Cliente Balcao", (String) body.get("cpf"), (String) body.get("email"));
+
+        anonymous().body(body).when().post("/register")
+                .then().statusCode(201)
+                .body("customerId", equalTo(customerId.toString()));
+    }
 }
