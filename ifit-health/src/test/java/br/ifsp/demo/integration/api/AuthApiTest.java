@@ -295,4 +295,10 @@ class AuthApiTest extends ApiTestBase {
                 .body("email", equalTo(student.email()))
                 .body("role", equalTo("USER"));
     }
+
+    @Test
+    @DisplayName("retorna 401 em /auth/me sem token")
+    void shouldRequireTokenOnMe() {
+        anonymous().when().get("/auth/me").then().statusCode(401);
+    }
 }
