@@ -221,4 +221,14 @@ class AuthApiTest extends ApiTestBase {
     void shouldRejectMalformedJson() {
         anonymous().body("{\"name\": ").when().post("/register").then().statusCode(400);
     }
+
+    @Test
+    @DisplayName("retorna 200 e um JWT ao autenticar com credenciais válidas")
+    void shouldAuthenticateAdmin() {
+        anonymous().body(Map.of("username", SeedData.ADMIN_EMAIL, "password", SeedData.ADMIN_PASSWORD))
+                .when().post("/authenticate")
+                .then().statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("token", matchesPattern("^[\\w-]+\\.[\\w-]+\\.[\\w-]+$"));
+    }
 }
