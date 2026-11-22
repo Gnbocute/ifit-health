@@ -270,4 +270,16 @@ class AuthApiTest extends ApiTestBase {
     void shouldRejectEmptyBody() {
         anonymous().body("{}").when().post("/authenticate").then().statusCode(400);
     }
+
+    @Test
+    @DisplayName("retorna os dados do administrador em /auth/me")
+    void shouldReturnAdminData() {
+        asAdmin().when().get("/auth/me")
+                .then().statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("userId", equalTo(SeedData.ADMIN_USER_ID.toString()))
+                .body("customerId", equalTo(SeedData.ADMIN_CUSTOMER_ID.toString()))
+                .body("email", equalTo(SeedData.ADMIN_EMAIL))
+                .body("role", equalTo("ADMIN"));
+    }
 }
