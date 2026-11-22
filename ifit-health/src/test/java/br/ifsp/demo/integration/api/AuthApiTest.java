@@ -240,4 +240,12 @@ class AuthApiTest extends ApiTestBase {
                 .then().statusCode(200)
                 .body("token", not(emptyOrNullString()));
     }
+
+    @Test
+    @DisplayName("autentica o aluno logo depois do cadastro")
+    void shouldAuthenticateRegisteredStudent() {
+        Student student = newStudent();
+
+        assertThat(student.token()).isNotBlank();
+    }
 }
