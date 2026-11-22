@@ -12,6 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -322,5 +323,11 @@ class AuthApiTest extends ApiTestBase {
     @DisplayName("retorna 401 em /hello sem token")
     void shouldRequireTokenOnHello() {
         anonymous().when().get("/hello").then().statusCode(401);
+    }
+
+    @Test
+    @DisplayName("retorna 401 para rota inexistente sem autenticação")
+    void shouldDenyUnknownEndpoint() {
+        anonymous().when().get("/unknown-" + LocalDate.now()).then().statusCode(401);
     }
 }
