@@ -215,4 +215,10 @@ class AuthApiTest extends ApiTestBase {
         assertThat(statusCodes).filteredOn(code -> code == 201).hasSize(1);
         assertThat(DbFixtures.count("SELECT COUNT(*) FROM app_user WHERE email = ?", email)).isEqualTo(1);
     }
+
+    @Test
+    @DisplayName("retorna 400 no cadastro com JSON malformado")
+    void shouldRejectMalformedJson() {
+        anonymous().body("{\"name\": ").when().post("/register").then().statusCode(400);
+    }
 }
