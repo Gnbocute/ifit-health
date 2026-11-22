@@ -12,8 +12,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -179,5 +186,33 @@ class AuthApiTest extends ApiTestBase {
         body.put("cpf", "11111111111");
 
         anonymous().body(body).when().post("/register").then().statusCode(400);
+    }
+
+    @Test
+    @DisplayName("retorna 409 (e nunca outro erro) para cadastros simultâneos com o mesmo e-mail")
+    void shouldHandleSimultaneousRegistrations() throws Exception {
+        String email = FakeData.email();
+        int requests = 8;
+        ExecutorService executor = Executors.newFixedThreadPool(requests);
+        CountDownLatch start = new CountDownLatch(1);
+        List<Future<Integer>> responses = new ArrayList<>();
+        for (int i = 0; i < requests; i++) {
+            Map<String, Object> body = FakeData.registerRequest();
+            body.put("email", email);
+            responses.add(executor.submit(() -> {
+                start.await();
+                return anonymous().body(body).when().post("/register").statusCode();
+            }));
+        }
+        start.countDown();
+        List<Integer> statusCodes = new ArrayList<>();
+        for (Future<Integer> response : responses) {
+            statusCodes.add(response.get(30, TimeUnit.SECONDS));
+        }
+        executor.shutdown();
+
+        assertThat(statusCodes).containsOnly(201, 409);
+        assertThat(statusCodes).filteredOn(code -> code == 201).hasSize(1);
+        assertThat(DbFixtures.count("SELECT COUNT(*) FROM app_user WHERE email = ?", email)).isEqualTo(1);
     }
 }
