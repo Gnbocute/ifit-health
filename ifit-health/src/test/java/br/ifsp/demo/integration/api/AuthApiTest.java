@@ -282,4 +282,17 @@ class AuthApiTest extends ApiTestBase {
                 .body("email", equalTo(SeedData.ADMIN_EMAIL))
                 .body("role", equalTo("ADMIN"));
     }
+
+    @Test
+    @DisplayName("retorna os dados do aluno cadastrado em /auth/me")
+    void shouldReturnStudentData() {
+        Student student = newStudent();
+
+        as(student).when().get("/auth/me")
+                .then().statusCode(200)
+                .body("userId", equalTo(student.userId().toString()))
+                .body("customerId", equalTo(student.customerId().toString()))
+                .body("email", equalTo(student.email()))
+                .body("role", equalTo("USER"));
+    }
 }
