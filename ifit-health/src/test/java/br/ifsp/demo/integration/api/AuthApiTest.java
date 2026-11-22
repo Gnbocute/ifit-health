@@ -113,4 +113,17 @@ class AuthApiTest extends ApiTestBase {
 
         assertThat(DbFixtures.count("SELECT COUNT(*) FROM app_user")).isEqualTo(2);
     }
+
+    @Test
+    @DisplayName("retorna 400 no cadastro quando a UF do endereço não tem 2 letras")
+    void shouldRejectInvalidAddressState() {
+        Map<String, Object> body = FakeData.registerRequest();
+        Map<String, Object> address = FakeData.address();
+        address.put("state", "SAO");
+        body.put("address", address);
+
+        anonymous().body(body).when().post("/register")
+                .then().statusCode(400)
+                .body("errors.'address.state'", equalTo("Informe a sigla do estado com 2 letras."));
+    }
 }
