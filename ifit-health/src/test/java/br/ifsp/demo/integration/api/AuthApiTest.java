@@ -3,6 +3,7 @@ package br.ifsp.demo.integration.api;
 import br.ifsp.demo.support.ApiTestBase;
 import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.FakeData;
+import br.ifsp.demo.support.SeedData;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -125,5 +126,16 @@ class AuthApiTest extends ApiTestBase {
         anonymous().body(body).when().post("/register")
                 .then().statusCode(400)
                 .body("errors.'address.state'", equalTo("Informe a sigla do estado com 2 letras."));
+    }
+
+    @Test
+    @DisplayName("retorna 409 no cadastro quando o e-mail já existe, sem diferenciar maiúsculas")
+    void shouldRejectDuplicatedEmail() {
+        Map<String, Object> body = FakeData.registerRequest();
+        body.put("email", SeedData.ADMIN_EMAIL.toUpperCase());
+
+        anonymous().body(body).when().post("/register")
+                .then().statusCode(409)
+                .body("message", equalTo("Este e-mail já está cadastrado."));
     }
 }
