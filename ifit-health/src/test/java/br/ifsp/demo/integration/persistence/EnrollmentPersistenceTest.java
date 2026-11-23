@@ -170,4 +170,16 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
     void shouldReturnEmptyWithoutEnrollment() {
         assertThat(enrollmentRepository.findByCustomer(customer(SeedData.ANA_CUSTOMER_ID))).isEmpty();
     }
+
+    @Test
+    @DisplayName("busca por atividade retorna só linhas ativas de matrículas ativas")
+    void shouldFindEnrolledActivities() {
+        UUID active = DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, FEE, MARCH_1);
+        enrollmentWith(DbFixtures.insertCustomer(), SeedData.SWIMMING_CLASS, MARCH_1, MARCH_31, false);
+        UUID inactiveEnrollment = DbFixtures.insertEnrollment(DbFixtures.insertCustomer(), false);
+        DbFixtures.insertEnrollmentActivity(inactiveEnrollment, SeedData.SWIMMING_CLASS, FEE, MARCH_1, null, true);
+
+        assertThat(ids(enrollmentRepository.findEnrolledActivitiesByActivityClass(activity(SeedData.SWIMMING_CLASS))))
+                .containsExactly(active);
+    }
 }
