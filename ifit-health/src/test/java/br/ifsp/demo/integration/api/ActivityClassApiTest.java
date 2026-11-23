@@ -2,18 +2,23 @@ package br.ifsp.demo.integration.api;
 
 import br.ifsp.demo.support.ApiTestBase;
 import br.ifsp.demo.support.DbFixtures;
+import br.ifsp.demo.support.FakeData;
 import br.ifsp.demo.support.SeedData;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.Matchers.*;
-
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.*;
 
 @Tag("ApiTest")
 @Tag("IntegrationTest")
@@ -106,5 +111,52 @@ class ActivityClassApiTest extends ApiTestBase {
     @DisplayName("retorna 401 ao buscar atividade sem token")
     void shouldRequireTokenToFindActivity() {
         anonymous().when().get("/activity-classes/{id}", SeedData.SWIMMING_CLASS).then().statusCode(401);
+    }
+
+    @Test
+    @DisplayName("retorna 201 com a atividade criada e grava no banco")
+    void shouldCreateActivity() {
+        Map<String, Object> body = validRequest();
+
+        String id = asAdmin().body(body).when().post("/activity-classes").then().statusCode(201).contentType(ContentType.JSON)
+            .body("id", notNullValue())
+            .body("sportId", equalTo(body.get("sportId")))
+            .body("roomId", equalTo(body.get("roomId")))
+            .body("trainerId", equalTo(body.get("trainerId")))
+            .body("weekdays", containsInAnyOrder("TUESDAY", "THURSDAY"))
+            .body("startTime", equalTo(body.get("startTime")))
+            .body("endTime", equalTo(body.get("endTime")))
+            .body("capacity", equalTo(body.get("capacity")))
+            .body("monthlyFee", isNumber(((Number) body.get("monthlyFee")).doubleValue()))
+            .body("active", is(true))
+            .extract()
+            .path("id");
+
+        asAdmin().when().get("/activity-classes/{id}", id).then().statusCode(200)
+            .body("sportId", equalTo(body.get("sportId")))
+            .body("roomId", equalTo(body.get("roomId")))
+            .body("trainerId", equalTo(body.get("trainerId")))
+            .body("weekdays", containsInAnyOrder("TUESDAY", "THURSDAY"))
+            .body("startTime", equalTo(body.get("startTime")))
+            .body("endTime", equalTo(body.get("endTime")))
+            .body("capacity", equalTo(body.get("capacity")))
+            .body("monthlyFee", isNumber(((Number) body.get("monthlyFee")).doubleValue()))
+            .body("active", is(true));
+
+        assertThat(DbFixtures.count("SELECT COUNT(*) FROM activity_class WHERE id = ?", id)).isEqualTo(1);
+        assertThat(DbFixtures.count("SELECT COUNT(*) FROM activity_prices WHERE activity_id = ?", id)).isEqualTo(1);
+    }
+
+    private Map<String, Object> validRequest() {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("sportId", SeedData.SPORT_SWIMMING.toString());
+        body.put("roomId", SeedData.ROOM_POOL.toString());
+        body.put("trainerId", SeedData.TRAINER_JULIANA.toString());
+        body.put("weekdays", List.of(DayOfWeek.TUESDAY.name(), DayOfWeek.THURSDAY.name()));
+        body.put("startTime", "08:00:00");
+        body.put("endTime", "09:00:00");
+        body.put("capacity", 12);
+        body.put("monthlyFee", 150.00);
+        return body;
     }
 }
