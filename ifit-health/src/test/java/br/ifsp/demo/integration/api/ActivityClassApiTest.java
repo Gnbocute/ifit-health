@@ -86,4 +86,13 @@ class ActivityClassApiTest extends ApiTestBase {
             .body("monthlyFee", isNumber(SeedData.SWIMMING_FEE.doubleValue()))
             .body("active", is(true));
     }
+
+    @Test
+    @DisplayName("retorna 404 ao buscar atividade com id desconhecido")
+    void shouldReturnNotFoundForUnknownActivity() {
+        UUID unknown = UUID.randomUUID();
+
+        asAdmin().when().get("/activity-classes/{id}", unknown).then().statusCode(404)
+            .body("message", equalTo("Activity class not found: " + unknown));
+    }
 }
