@@ -201,4 +201,17 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
             assertThat(e.getEnrollmentActivities()).hasSize(2);
         });
     }
+
+    @Test
+    @DisplayName("busca por período inclui os dois limites e ignora linhas inativas")
+    void shouldFindByStartDateBetween() {
+        UUID onFirstDay = DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, FEE, MARCH_1);
+        UUID onLastDay = DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, FEE, MARCH_31);
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, FEE, MARCH_1.minusDays(1));
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, FEE, MARCH_31.plusDays(1));
+        enrollmentWith(DbFixtures.insertCustomer(), SeedData.SWIMMING_CLASS, MARCH_1, MARCH_31, false);
+
+        assertThat(ids(enrollmentRepository.findActiveEnrollmentActivitiesByStartDateBetween(MARCH_1, MARCH_31)))
+                .containsExactly(onFirstDay, onLastDay);
+    }
 }
