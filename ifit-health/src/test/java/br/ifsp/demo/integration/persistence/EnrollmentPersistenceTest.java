@@ -6,6 +6,7 @@ import br.ifsp.demo.domain.model.EnrollmentActivity;
 import br.ifsp.demo.exception.CapacityIsGreaterThanAcceptedException;
 import br.ifsp.demo.persistence.sqlite.SqliteEnrollmentRepository;
 import br.ifsp.demo.support.DbFixtures;
+import br.ifsp.demo.support.FakeData;
 import br.ifsp.demo.support.PersistenceTestBase;
 import br.ifsp.demo.support.SeedData;
 import org.junit.jupiter.api.DisplayName;
@@ -181,5 +182,23 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
 
         assertThat(ids(enrollmentRepository.findEnrolledActivitiesByActivityClass(activity(SeedData.SWIMMING_CLASS))))
                 .containsExactly(active);
+    }
+
+    @Test
+    @DisplayName("busca matrículas por atividade retorna cada uma uma vez com o cliente")
+    void shouldFindEnrollmentsByActivity() {
+        String name = FakeData.firstName() + " " + FakeData.lastName();
+        UUID customer = DbFixtures.insertCustomer(name, FakeData.cpf(), FakeData.email());
+        UUID enrollment = DbFixtures.insertEnrollment(customer, true);
+        DbFixtures.insertEnrollmentActivity(enrollment, SeedData.SWIMMING_CLASS, FEE, MARCH_1, null, true);
+        DbFixtures.insertEnrollmentActivity(enrollment, judo(10, DayOfWeek.TUESDAY), FEE, MARCH_1, null, true);
+
+        List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByActivityClass(activity(SeedData.SWIMMING_CLASS));
+
+        assertThat(enrollments).singleElement().satisfies(e -> {
+            assertThat(e.getId()).isEqualTo(enrollment);
+            assertThat(e.getCustomer().getName()).isEqualTo(name);
+            assertThat(e.getEnrollmentActivities()).hasSize(2);
+        });
     }
 }
