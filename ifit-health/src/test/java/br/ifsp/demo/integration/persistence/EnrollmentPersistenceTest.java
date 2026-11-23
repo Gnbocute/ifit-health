@@ -95,4 +95,20 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
         assertThat(DbFixtures.count("SELECT COUNT(*) FROM enrollment_activities WHERE activity_id = ? AND status = 'ACTIVE'",
                 judo.toString())).isEqualTo(1);
     }
+
+    @Test
+    @DisplayName("desfaz todas as atividades quando uma delas está lotada")
+    void shouldRollBackWhenOneActivityIsFull() {
+        UUID full = judo(1, DayOfWeek.TUESDAY);
+        DbFixtures.fillActivity(full, FEE, 1);
+        int before = DbFixtures.count("SELECT COUNT(*) FROM enrollment_activities");
+
+        assertThatThrownBy(() -> enrollmentRepository.enroll(customer(SeedData.ANA_CUSTOMER_ID),
+                List.of(activity(SeedData.SWIMMING_CLASS), activity(full))))
+                .isInstanceOf(CapacityIsGreaterThanAcceptedException.class);
+
+        assertThat(DbFixtures.count("SELECT COUNT(*) FROM enrollment_activities")).isEqualTo(before);
+        assertThat(DbFixtures.count("SELECT COUNT(*) FROM enrollments WHERE customer_id = ?",
+                SeedData.ANA_CUSTOMER_ID.toString())).isZero();
+    }
 }
