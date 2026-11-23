@@ -214,4 +214,16 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
         assertThat(ids(enrollmentRepository.findActiveEnrollmentActivitiesByStartDateBetween(MARCH_1, MARCH_31)))
                 .containsExactly(onFirstDay, onLastDay);
     }
+
+    @Test
+    @DisplayName("busca por período e modalidade mantém só a modalidade")
+    void shouldFindBySport() {
+        UUID swimming = DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, FEE, MARCH_1);
+        DbFixtures.enrollNewCustomer(judo(10, DayOfWeek.TUESDAY), FEE, MARCH_1);
+
+        var sport = activityClassRepository.findSportById(SeedData.SPORT_SWIMMING);
+
+        assertThat(ids(enrollmentRepository.findActiveEnrollmentActivitiesByStartDateBetweenAndSport(MARCH_1, MARCH_31, sport)))
+                .containsExactly(swimming);
+    }
 }
