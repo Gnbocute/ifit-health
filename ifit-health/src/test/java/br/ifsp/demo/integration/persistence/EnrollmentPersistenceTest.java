@@ -2,6 +2,7 @@ package br.ifsp.demo.integration.persistence;
 
 import br.ifsp.demo.domain.model.Customer;
 import br.ifsp.demo.domain.model.Enrollment;
+import br.ifsp.demo.domain.model.EnrollmentActivity;
 import br.ifsp.demo.exception.CapacityIsGreaterThanAcceptedException;
 import br.ifsp.demo.persistence.sqlite.SqliteEnrollmentRepository;
 import br.ifsp.demo.support.DbFixtures;
@@ -45,6 +46,10 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
     private UUID enrollmentWith(UUID customer, UUID activity, LocalDate start, LocalDate end, boolean active) {
         UUID enrollment = DbFixtures.insertEnrollment(customer, true);
         return DbFixtures.insertEnrollmentActivity(enrollment, activity, FEE, start, end, active);
+    }
+
+    private static List<UUID> ids(List<EnrollmentActivity> activities) {
+        return activities.stream().map(EnrollmentActivity::getId).toList();
     }
 
     @Test
@@ -143,5 +148,20 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
 
         assertThat(DbFixtures.text("SELECT status FROM enrollments WHERE id = ?", enrollment.getId().toString())).isEqualTo("ACTIVE");
         assertThat(DbFixtures.text("SELECT end_date FROM enrollments WHERE id = ?", enrollment.getId().toString())).isNull();
+    }
+
+    @Test
+    @DisplayName("carrega a matrícula com as atividades ordenadas pela data de início")
+    void shouldFindByCustomer() {
+        UUID enrollment = DbFixtures.insertEnrollment(SeedData.ANA_CUSTOMER_ID, true);
+        UUID later = DbFixtures.insertEnrollmentActivity(enrollment, SeedData.SWIMMING_CLASS, FEE, MARCH_31, null, true);
+        UUID earlier = DbFixtures.insertEnrollmentActivity(enrollment, judo(10, DayOfWeek.TUESDAY), FEE, MARCH_1, MARCH_31, false);
+
+        Enrollment found = enrollmentRepository.findByCustomer(customer(SeedData.ANA_CUSTOMER_ID)).orElseThrow();
+
+        assertThat(found.getId()).isEqualTo(enrollment);
+        assertThat(ids(found.getEnrollmentActivities())).containsExactly(earlier, later);
+        assertThat(found.getEnrollmentActivities().getFirst().isActive()).isFalse();
+        assertThat(found.getEnrollmentActivities().getFirst().getEndDate()).isEqualTo(MARCH_31);
     }
 }
