@@ -101,4 +101,10 @@ class ActivityClassApiTest extends ApiTestBase {
     void shouldRejectInvalidId() {
         asAdmin().when().get("/activity-classes/{id}", "not-a-uuid").then().statusCode(400);
     }
+
+    @Test
+    @DisplayName("retorna 401 ao buscar atividade sem token")
+    void shouldRequireTokenToFindActivity() {
+        anonymous().when().get("/activity-classes/{id}", SeedData.SWIMMING_CLASS).then().statusCode(401);
+    }
 }
