@@ -5,6 +5,8 @@ import br.ifsp.demo.domain.model.Enrollment;
 import br.ifsp.demo.domain.model.EnrollmentActivity;
 import br.ifsp.demo.exception.CapacityIsGreaterThanAcceptedException;
 import br.ifsp.demo.persistence.sqlite.SqliteEnrollmentRepository;
+import br.ifsp.demo.persistence.sqlite.SqliteScheduleConflictQueries;
+import br.ifsp.demo.persistence.sqlite.SqliteScheduleConflictQueries.ConflictCandidate;
 import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.FakeData;
 import br.ifsp.demo.support.PersistenceTestBase;
@@ -34,6 +36,9 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
 
     @Autowired
     private SqliteEnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    private SqliteScheduleConflictQueries conflictQueries;
 
     private UUID activityOn(UUID sport, UUID room, UUID trainer, int startHour, int capacity, DayOfWeek... days) {
         return DbFixtures.insertActivity(sport, room, trainer, LocalTime.of(startHour, 0), LocalTime.of(startHour + 1, 0),
@@ -253,5 +258,25 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
 
         assertThat(ids(enrollmentRepository.findEnrollmentActivitiesByPeriod(MARCH_1, MARCH_31)))
                 .containsExactlyInAnyOrder(startedBefore, endedOnFirstDay, startedOnLastDay);
+    }
+
+    @Test
+    @DisplayName("lista as outras atividades ativas dos alunos matriculados na atividade")
+    void shouldFindOtherActivitiesOfEnrolledStudents() {
+        UUID judo = judo(10, DayOfWeek.TUESDAY);
+        UUID enrollment = DbFixtures.insertEnrollment(SeedData.ANA_CUSTOMER_ID, true);
+        DbFixtures.insertEnrollmentActivity(enrollment, SeedData.SWIMMING_CLASS, FEE, MARCH_1, null, true);
+        DbFixtures.insertEnrollmentActivity(enrollment, judo, FEE, MARCH_1, null, true);
+
+        List<ConflictCandidate> candidates = conflictQueries.findActiveActivitiesOfEnrolledStudents(SeedData.SWIMMING_CLASS);
+
+        assertThat(candidates).singleElement().satisfies(c -> {
+            assertThat(c.customerId()).isEqualTo(SeedData.ANA_CUSTOMER_ID);
+            assertThat(c.customerName()).isEqualTo("Ana Souza");
+            assertThat(c.activityClassId()).isEqualTo(judo);
+            assertThat(c.sportName()).isEqualTo("Judô");
+            assertThat(c.weekdays()).isEqualTo("TUESDAY");
+            assertThat(c.startTime()).isEqualTo(LocalTime.of(18, 0));
+        });
     }
 }
