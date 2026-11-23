@@ -64,4 +64,10 @@ class ActivityClassApiTest extends ApiTestBase {
                 .then().statusCode(200)
                 .body("id", hasItem(SeedData.SWIMMING_CLASS.toString()));
     }
+
+     @Test
+    @DisplayName("retorna 401 ao listar atividades sem token")
+    void shouldRequireTokenToListActivities() {
+        anonymous().when().get("/activity-classes").then().statusCode(401);
+    }
 }
