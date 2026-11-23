@@ -95,4 +95,10 @@ class ActivityClassApiTest extends ApiTestBase {
         asAdmin().when().get("/activity-classes/{id}", unknown).then().statusCode(404)
             .body("message", equalTo("Activity class not found: " + unknown));
     }
+
+    @Test
+    @DisplayName("retorna 400 ao buscar atividade com id que não é UUID")
+    void shouldRejectInvalidId() {
+        asAdmin().when().get("/activity-classes/{id}", "not-a-uuid").then().statusCode(400);
+    }
 }
