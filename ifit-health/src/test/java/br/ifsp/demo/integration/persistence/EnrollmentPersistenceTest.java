@@ -2,6 +2,7 @@ package br.ifsp.demo.integration.persistence;
 
 import br.ifsp.demo.domain.model.Customer;
 import br.ifsp.demo.domain.model.Enrollment;
+import br.ifsp.demo.exception.CapacityIsGreaterThanAcceptedException;
 import br.ifsp.demo.persistence.sqlite.SqliteEnrollmentRepository;
 import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.PersistenceTestBase;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Tag("PersistenceTest")
 @Tag("IntegrationTest")
@@ -63,5 +65,15 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
         assertThat(second.getId()).isEqualTo(first.getId());
         assertThat(second.getEnrollmentActivities()).hasSize(2);
         assertThat(DbFixtures.count("SELECT COUNT(*) FROM enrollments")).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("rejeita atividade lotada usando o COUNT de matrículas ativas")
+    void shouldRejectFullActivity() {
+        UUID judo = judo(2, DayOfWeek.TUESDAY);
+        DbFixtures.fillActivity(judo, FEE, 2);
+
+        assertThatThrownBy(() -> enrollmentRepository.enroll(customer(SeedData.ANA_CUSTOMER_ID), List.of(activity(judo))))
+                .isInstanceOf(CapacityIsGreaterThanAcceptedException.class);
     }
 }
