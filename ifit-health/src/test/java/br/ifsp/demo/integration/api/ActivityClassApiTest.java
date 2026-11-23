@@ -65,9 +65,25 @@ class ActivityClassApiTest extends ApiTestBase {
                 .body("id", hasItem(SeedData.SWIMMING_CLASS.toString()));
     }
 
-     @Test
+    @Test
     @DisplayName("retorna 401 ao listar atividades sem token")
     void shouldRequireTokenToListActivities() {
         anonymous().when().get("/activity-classes").then().statusCode(401);
+    }
+
+    @Test
+    @DisplayName("retorna os dados da atividade buscada por id")
+    void shouldReturnActivity() {
+        asAdmin().when().get("/activity-classes/{id}", SeedData.SWIMMING_CLASS).then().statusCode(200).contentType(ContentType.JSON)
+            .body("id", equalTo(SeedData.SWIMMING_CLASS.toString()))
+            .body("sportId", equalTo(SeedData.SPORT_SWIMMING.toString()))
+            .body("roomId", equalTo(SeedData.ROOM_POOL.toString()))
+            .body("trainerId", equalTo(SeedData.TRAINER_JULIANA.toString()))
+            .body("weekdays", contains(SeedData.SWIMMING_DAY.name()))
+            .body("startTime", equalTo("11:30:00"))
+            .body("endTime", equalTo("12:30:00"))
+            .body("capacity", equalTo(SeedData.SWIMMING_CAPACITY))
+            .body("monthlyFee", isNumber(SeedData.SWIMMING_FEE.doubleValue()))
+            .body("active", is(true));
     }
 }
