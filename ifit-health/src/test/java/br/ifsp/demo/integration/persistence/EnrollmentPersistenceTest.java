@@ -26,6 +26,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Tag("IntegrationTest")
 @DisplayName("Persistência de matrículas e consultas de conflito de horário")
 class EnrollmentPersistenceTest extends PersistenceTestBase {
+    private static final LocalDate MARCH_1 = LocalDate.of(2026, 3, 1);
+    private static final LocalDate MARCH_31 = LocalDate.of(2026, 3, 31);
     private static final BigDecimal FEE = new BigDecimal("100");
 
     @Autowired
@@ -38,6 +40,11 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
 
     private UUID judo(int capacity, DayOfWeek... days) {
         return activityOn(SeedData.SPORT_JUDO, SeedData.ROOM_JUDO, SeedData.TRAINER_CARLOS, 18, capacity, days);
+    }
+
+    private UUID enrollmentWith(UUID customer, UUID activity, LocalDate start, LocalDate end, boolean active) {
+        UUID enrollment = DbFixtures.insertEnrollment(customer, true);
+        return DbFixtures.insertEnrollmentActivity(enrollment, activity, FEE, start, end, active);
     }
 
     @Test
@@ -75,5 +82,17 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
 
         assertThatThrownBy(() -> enrollmentRepository.enroll(customer(SeedData.ANA_CUSTOMER_ID), List.of(activity(judo))))
                 .isInstanceOf(CapacityIsGreaterThanAcceptedException.class);
+    }
+
+    @Test
+    @DisplayName("ignora matrículas canceladas na contagem de vagas")
+    void shouldIgnoreCanceledEnrollmentsWhenCounting() {
+        UUID judo = judo(1, DayOfWeek.TUESDAY);
+        enrollmentWith(DbFixtures.insertCustomer(), judo, MARCH_1, MARCH_31, false);
+
+        enrollmentRepository.enroll(customer(SeedData.ANA_CUSTOMER_ID), List.of(activity(judo)));
+
+        assertThat(DbFixtures.count("SELECT COUNT(*) FROM enrollment_activities WHERE activity_id = ? AND status = 'ACTIVE'",
+                judo.toString())).isEqualTo(1);
     }
 }
