@@ -56,4 +56,12 @@ class ActivityClassApiTest extends ApiTestBase {
                 .then().statusCode(200)
                 .body("id", contains(SeedData.SWIMMING_CLASS.toString()));
     }
+
+    @Test
+    @DisplayName("libera a listagem de atividades para alunos")
+    void shouldListActivitiesForStudents() {
+        as(newStudent()).when().get("/activity-classes")
+                .then().statusCode(200)
+                .body("id", hasItem(SeedData.SWIMMING_CLASS.toString()));
+    }
 }
