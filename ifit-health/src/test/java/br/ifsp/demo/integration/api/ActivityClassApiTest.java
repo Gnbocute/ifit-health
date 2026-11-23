@@ -10,6 +10,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.Matchers.*;
 
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
+import java.util.UUID;
+
 @Tag("ApiTest")
 @Tag("IntegrationTest")
 @DisplayName("API de turmas: /activity-classes")
@@ -34,5 +39,21 @@ class ActivityClassApiTest extends ApiTestBase {
                 .body("[0].enrolledCount", equalTo(3))
                 .body("[0].availableSpots", equalTo(SeedData.SWIMMING_CAPACITY - 3))
                 .body("[0].active", is(true));
+    }
+
+    @Test
+    @DisplayName("filtra as atividades pelo parâmetro active")
+    void shouldFilterByActive() {
+        UUID inactive = DbFixtures.insertActivity(SeedData.SPORT_JUDO, SeedData.ROOM_JUDO, SeedData.TRAINER_CARLOS,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), 10, new BigDecimal("90"), false, DayOfWeek.FRIDAY);
+
+        asAdmin().queryParam("active", false).when().get("/activity-classes")
+                .then().statusCode(200)
+                .body("id", contains(inactive.toString()))
+                .body("[0].availableSpots", equalTo(0));
+
+        asAdmin().queryParam("active", true).when().get("/activity-classes")
+                .then().statusCode(200)
+                .body("id", contains(SeedData.SWIMMING_CLASS.toString()));
     }
 }
