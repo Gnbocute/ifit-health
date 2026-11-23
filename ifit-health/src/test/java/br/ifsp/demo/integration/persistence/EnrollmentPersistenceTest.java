@@ -293,4 +293,19 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
 
         assertThat(conflictQueries.findActiveActivitiesOfEnrolledStudents(SeedData.SWIMMING_CLASS)).isEmpty();
     }
+
+    @Test
+    @DisplayName("ordena por nome os alunos do conflito de horário")
+    void shouldOrderByStudentName() {
+        UUID judo = judo(10, DayOfWeek.TUESDAY);
+        for (String name : List.of("Matheus Farias", "Gabriel Bocute")) {
+            UUID enrollment = DbFixtures.insertEnrollment(DbFixtures.insertCustomer(name, FakeData.cpf(), FakeData.email()), true);
+            DbFixtures.insertEnrollmentActivity(enrollment, SeedData.SWIMMING_CLASS, FEE, MARCH_1, null, true);
+            DbFixtures.insertEnrollmentActivity(enrollment, judo, FEE, MARCH_1, null, true);
+        }
+
+        assertThat(conflictQueries.findActiveActivitiesOfEnrolledStudents(SeedData.SWIMMING_CLASS))
+                .extracting(ConflictCandidate::customerName)
+                .containsExactly("Gabriel Bocute", "Matheus Farias");
+    }
 }
