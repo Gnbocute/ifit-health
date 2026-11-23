@@ -240,4 +240,18 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
         assertThat(enrollmentRepository.findActiveEnrollmentActivitiesByStartDateBetweenAndDayOfWeek(
                 MARCH_1, MARCH_31, DayOfWeek.SUNDAY)).isEmpty();
     }
+
+    @Test
+    @DisplayName("busca por período retorna toda matrícula que cruza o período")
+    void shouldFindOverlappingEnrollments() {
+        UUID startedBefore = DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, FEE, LocalDate.of(2026, 1, 10));
+        UUID endedOnFirstDay = enrollmentWith(DbFixtures.insertCustomer(), SeedData.SWIMMING_CLASS,
+                LocalDate.of(2026, 2, 1), MARCH_1, false);
+        UUID startedOnLastDay = DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, FEE, MARCH_31);
+        enrollmentWith(DbFixtures.insertCustomer(), SeedData.SWIMMING_CLASS, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 2, 28), false);
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, FEE, LocalDate.of(2026, 4, 1));
+
+        assertThat(ids(enrollmentRepository.findEnrollmentActivitiesByPeriod(MARCH_1, MARCH_31)))
+                .containsExactlyInAnyOrder(startedBefore, endedOnFirstDay, startedOnLastDay);
+    }
 }
