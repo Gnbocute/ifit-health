@@ -111,4 +111,22 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
         assertThat(DbFixtures.count("SELECT COUNT(*) FROM enrollments WHERE customer_id = ?",
                 SeedData.ANA_CUSTOMER_ID.toString())).isZero();
     }
+
+    @Test
+    @DisplayName("grava a data de cancelamento e desativa a matrícula")
+    void shouldPersistCancellation() {
+        Customer customer = customer(SeedData.ANA_CUSTOMER_ID);
+        Enrollment enrollment = enrollmentRepository.enroll(customer, List.of(activity(SeedData.SWIMMING_CLASS)));
+        UUID activityId = enrollment.getEnrollmentActivities().getFirst().getId();
+        LocalDate endDate = LocalDate.now().plusDays(5);
+
+        enrollment.cancelActivity(activityId, endDate);
+        enrollment.deactivate();
+        enrollmentRepository.save(enrollment);
+
+        assertThat(DbFixtures.text("SELECT status || '|' || end_date FROM enrollment_activities WHERE id = ?", activityId.toString()))
+                .isEqualTo("INACTIVE|" + endDate);
+        assertThat(DbFixtures.text("SELECT status || '|' || end_date FROM enrollments WHERE id = ?", enrollment.getId().toString()))
+                .isEqualTo("INACTIVE|" + LocalDate.now());
+    }
 }
