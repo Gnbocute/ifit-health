@@ -164,4 +164,10 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
         assertThat(found.getEnrollmentActivities().getFirst().isActive()).isFalse();
         assertThat(found.getEnrollmentActivities().getFirst().getEndDate()).isEqualTo(MARCH_31);
     }
+
+    @Test
+    @DisplayName("retorna vazio quando o cliente não tem matrícula")
+    void shouldReturnEmptyWithoutEnrollment() {
+        assertThat(enrollmentRepository.findByCustomer(customer(SeedData.ANA_CUSTOMER_ID))).isEmpty();
+    }
 }
