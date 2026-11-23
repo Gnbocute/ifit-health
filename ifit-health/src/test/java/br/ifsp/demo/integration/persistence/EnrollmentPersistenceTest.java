@@ -279,4 +279,18 @@ class EnrollmentPersistenceTest extends PersistenceTestBase {
             assertThat(c.startTime()).isEqualTo(LocalTime.of(18, 0));
         });
     }
+
+    @Test
+    @DisplayName("ignora atividades canceladas e alunos que saíram da atividade no conflito de horário")
+    void shouldIgnoreInactiveRows() {
+        UUID judo = judo(10, DayOfWeek.TUESDAY);
+        UUID canceledOther = DbFixtures.insertEnrollment(DbFixtures.insertCustomer(), true);
+        DbFixtures.insertEnrollmentActivity(canceledOther, SeedData.SWIMMING_CLASS, FEE, MARCH_1, null, true);
+        DbFixtures.insertEnrollmentActivity(canceledOther, judo, FEE, MARCH_1, MARCH_31, false);
+        UUID leftTarget = DbFixtures.insertEnrollment(DbFixtures.insertCustomer(), true);
+        DbFixtures.insertEnrollmentActivity(leftTarget, SeedData.SWIMMING_CLASS, FEE, MARCH_1, MARCH_31, false);
+        DbFixtures.insertEnrollmentActivity(leftTarget, judo, FEE, MARCH_1, null, true);
+
+        assertThat(conflictQueries.findActiveActivitiesOfEnrolledStudents(SeedData.SWIMMING_CLASS)).isEmpty();
+    }
 }
