@@ -2,7 +2,6 @@ package br.ifsp.demo.integration.api;
 
 import br.ifsp.demo.support.ApiTestBase;
 import br.ifsp.demo.support.DbFixtures;
-import br.ifsp.demo.support.FakeData;
 import br.ifsp.demo.support.SeedData;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
@@ -264,5 +263,18 @@ class ActivityClassApiTest extends ApiTestBase {
 
         asAdmin().body(body).when().post("/activity-classes").then().statusCode(409)
             .body("message", equalTo("Capacity exceeds room limit"));
+    }
+
+    @Test
+    @DisplayName("retorna 409 quando a sala já está ocupada no horário")
+    void shouldRejectRoomConflict() {
+        Map<String, Object> body = validRequest();
+        body.put("weekdays", List.of(DayOfWeek.MONDAY.name()));
+        body.put("startTime", "12:00:00");
+        body.put("endTime", "13:00:00");
+
+        asAdmin().body(body).when().post("/activity-classes")
+                .then().statusCode(409)
+                .body("message", equalTo("Room is already booked for the given schedule"));
     }
 }
