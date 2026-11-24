@@ -245,4 +245,20 @@ class EnrollmentApiTest extends ApiTestBase {
                 .then().statusCode(200)
                 .body("activities[0].endDate", equalTo(LocalDate.now().toString()));
     }
+
+    @Test
+    @DisplayName("mantém a matrícula ativa enquanto houver outra atividade ativa")
+    void shouldKeepEnrollmentActiveWithOtherActivities() {
+        Student student = newStudent();
+        UUID gym = gymOnMonday(LocalTime.of(8, 0), LocalTime.of(9, 0), 10);
+        String swimmingEnrollment = as(student).body(enrollIn(SeedData.SWIMMING_CLASS, gym)).when().post("/me/enrollment")
+                .then().statusCode(201)
+                .extract().path("activities.find { it.activityClassId == '%s' }.enrollmentActivityId"
+                        .formatted(SeedData.SWIMMING_CLASS));
+
+        as(student).when().delete("/me/enrollment/activities/{id}", swimmingEnrollment)
+                .then().statusCode(200)
+                .body("active", is(true))
+                .body("activities.findAll { it.active }.activityClassId", contains(gym.toString()));
+    }
 }
