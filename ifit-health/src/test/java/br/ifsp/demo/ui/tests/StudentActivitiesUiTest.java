@@ -89,4 +89,17 @@ class StudentActivitiesUiTest extends UiTestBase {
         assertThat(page.isSelected(SWIMMING)).isTrue();
         assertThat(page.currentPath()).isEqualTo("/aluno/atividades");
     }
+
+    @Test
+    @DisplayName("marca a atividade como Matriculado e bloqueia nova seleção")
+    void shouldMarkEnrolledActivity() {
+        StudentAccount student = registerStudent();
+        enrollViaApi(student, SeedData.SWIMMING_CLASS);
+        loginPage().loginAs(student.email(), student.password());
+        StudentActivitiesPage page = new StudentActivitiesPage(driver).waitUntilLoaded();
+
+        assertThat(page.badge(SWIMMING)).isEqualTo("Matriculado");
+        page.toggle(SWIMMING);
+        assertThat(page.isSelectionBarVisible()).isFalse();
+    }
 }
