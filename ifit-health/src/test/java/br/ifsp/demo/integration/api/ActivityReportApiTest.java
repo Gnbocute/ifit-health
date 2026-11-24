@@ -70,4 +70,14 @@ class ActivityReportApiTest extends ApiTestBase {
                 .body(SWIMMING_ITEM + ".enrollmentCount", equalTo(0))
                 .body(SWIMMING_ITEM + ".revenue", isNumber(0));
     }
+
+    @Test
+    @DisplayName("cobra todos os meses em que a matrícula ficou ativa")
+    void shouldChargeEveryActiveMonth() {
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, LocalDate.of(2026, 1, 1));
+
+        report(LocalDate.of(2026, 1, 1), MARCH_31)
+                .statusCode(200)
+                .body(SWIMMING_ITEM + ".revenue", isNumber(540));
+    }
 }
