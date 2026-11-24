@@ -314,4 +314,10 @@ class ActivityClassApiTest extends ApiTestBase {
 
         assertThat(DbFixtures.count("SELECT COUNT(*) FROM activity_class")).isEqualTo(countBefore);
     }
+
+    @Test
+    @DisplayName("retorna 401 ao criar atividade sem token")
+    void shouldRequireTokenToCreateActivity() {
+        anonymous().body(validRequest()).when().post("/activity-classes").then().statusCode(401);
+    }
 }
