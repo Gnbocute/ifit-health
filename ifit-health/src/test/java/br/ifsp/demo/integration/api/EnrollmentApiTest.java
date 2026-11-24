@@ -213,4 +213,10 @@ class EnrollmentApiTest extends ApiTestBase {
     void shouldForbidAdminToFindEnrollment() {
         asAdmin().when().get("/me/enrollment").then().statusCode(403);
     }
+
+    @Test
+    @DisplayName("retorna 401 ao consultar matrícula sem token")
+    void shouldRequireTokenToFindEnrollment() {
+        anonymous().when().get("/me/enrollment").then().statusCode(401);
+    }
 }
