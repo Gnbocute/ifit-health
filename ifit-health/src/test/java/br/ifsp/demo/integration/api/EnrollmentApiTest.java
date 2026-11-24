@@ -122,4 +122,15 @@ class EnrollmentApiTest extends ApiTestBase {
                 .then().statusCode(409)
                 .body("message", equalTo("The activity is inactive: " + inactive));
     }
+
+    @Test
+    @DisplayName("retorna 409 quando o aluno já está matriculado na atividade")
+    void shouldRejectRepeatedEnrollment() {
+        Student student = newStudent();
+        enrollInSwimming(student);
+
+        as(student).body(enrollIn(SeedData.SWIMMING_CLASS)).when().post("/me/enrollment")
+                .then().statusCode(409)
+                .body("message", equalTo("The customer is already enrolled in this activity"));
+    }
 }
