@@ -102,4 +102,16 @@ class StudentActivitiesUiTest extends UiTestBase {
         page.toggle(SWIMMING);
         assertThat(page.isSelectionBarVisible()).isFalse();
     }
+
+    @Test
+    @DisplayName("marca atividade lotada como Esgotada e bloqueia a seleção")
+    void shouldMarkFullActivity() {
+        UUID gym = gymOnMonday(8, 1);
+        DbFixtures.fillActivity(gym, new BigDecimal("120"), 1);
+        StudentActivitiesPage page = openAsNewStudent();
+
+        assertThat(page.badge("MUSCULAÇÃO")).isEqualTo("Esgotada");
+        page.toggle("MUSCULAÇÃO");
+        assertThat(page.isSelectionBarVisible()).isFalse();
+    }
 }
