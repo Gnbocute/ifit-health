@@ -187,4 +187,15 @@ class ActivityClassApiTest extends ApiTestBase {
         asAdmin().body(body).when().post("/activity-classes").then().statusCode(400)
             .body("errors." + field, not(emptyOrNullString()));
     }
+
+    @Test
+    @DisplayName("retorna 400 quando o horário final não é depois do inicial")
+    void shouldRejectEndBeforeStart() {
+        Map<String, Object> body = validRequest();
+        body.put("startTime", "10:00:00");
+        body.put("endTime", "09:00:00");
+
+        asAdmin().body(body).when().post("/activity-classes").then().statusCode(400)
+            .body("message", equalTo("End time must be after start time"));
+    }
 }
