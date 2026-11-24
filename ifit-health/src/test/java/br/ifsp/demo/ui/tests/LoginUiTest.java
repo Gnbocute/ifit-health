@@ -1,6 +1,7 @@
 package br.ifsp.demo.ui.tests;
 
 import br.ifsp.demo.ui.UiTestBase;
+import br.ifsp.demo.ui.pages.AppShell;
 import br.ifsp.demo.ui.pages.LoginPage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -19,5 +20,16 @@ class LoginUiTest extends UiTestBase {
         assertThat(login.pageTitle()).isEqualTo(LoginPage.TITLE);
         assertThat(login.isFormDisplayed()).isTrue();
         assertThat(login.submitText()).isEqualTo("Entrar");
+    }
+
+    @Test
+    @DisplayName("abre a área do admin ao entrar como administrador")
+    void shouldLoginAsAdmin() {
+        loginAsAdmin();
+
+        AppShell shell = new AppShell(driver);
+        assertThat(shell.currentPath()).isEqualTo("/admin/atividades");
+        assertThat(shell.area()).isEqualTo("ADMINISTRAÇÃO");
+        assertThat(shell.toast()).isEqualTo("Bem-vindo(a), Administrador!");
     }
 }
