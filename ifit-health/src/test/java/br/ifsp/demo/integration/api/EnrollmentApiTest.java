@@ -111,4 +111,15 @@ class EnrollmentApiTest extends ApiTestBase {
                 .then().statusCode(404)
                 .body("message", equalTo("Activity class not found: " + unknown));
     }
+
+    @Test
+    @DisplayName("retorna 409 ao matricular em atividade inativa")
+    void shouldRejectInactiveActivity() {
+        UUID inactive = DbFixtures.insertActivity(SeedData.SPORT_JUDO, SeedData.ROOM_JUDO, SeedData.TRAINER_CARLOS,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), 10, new BigDecimal("90"), false, DayOfWeek.FRIDAY);
+
+        as(newStudent()).body(enrollIn(inactive)).when().post("/me/enrollment")
+                .then().statusCode(409)
+                .body("message", equalTo("The activity is inactive: " + inactive));
+    }
 }
