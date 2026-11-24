@@ -6,6 +6,7 @@ import br.ifsp.demo.ui.UiTestBase;
 import br.ifsp.demo.ui.pages.AdminActivitiesPage;
 import br.ifsp.demo.ui.pages.AppShell;
 import br.ifsp.demo.ui.pages.LoginPage;
+import br.ifsp.demo.ui.pages.MyActivitiesPage;
 import br.ifsp.demo.ui.pages.RegisterPage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -95,5 +96,13 @@ class LoginUiTest extends UiTestBase {
 
         new AdminActivitiesPage(driver).visit();
         login.waitForPath("/");
+    }
+
+    @Test
+    @DisplayName("redireciona para o login ao abrir tela protegida sem sessão")
+    void shouldProtectScreensWithoutSession() {
+        new MyActivitiesPage(driver).visit();
+
+        new LoginPage(driver).waitForPath("/");
     }
 }
