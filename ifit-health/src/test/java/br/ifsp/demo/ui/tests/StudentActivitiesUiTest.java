@@ -1,11 +1,16 @@
 package br.ifsp.demo.ui.tests;
 
+import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.SeedData;
 import br.ifsp.demo.ui.UiTestBase;
 import br.ifsp.demo.ui.pages.StudentActivitiesPage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,5 +36,14 @@ class StudentActivitiesUiTest extends UiTestBase {
                 .contains("Seg · 11:30–12:30")
                 .contains("R$ 180,00");
         assertThat(page.badge(SWIMMING)).isEqualTo("20 vagas");
+    }
+
+    @Test
+    @DisplayName("não lista atividades inativas para o aluno")
+    void shouldHideInactiveActivities() {
+        DbFixtures.insertActivity(SeedData.SPORT_JUDO, SeedData.ROOM_JUDO, SeedData.TRAINER_CARLOS,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), 10, new BigDecimal("90"), false, DayOfWeek.FRIDAY);
+
+        assertThat(openAsNewStudent().sports()).containsExactly(SWIMMING);
     }
 }
