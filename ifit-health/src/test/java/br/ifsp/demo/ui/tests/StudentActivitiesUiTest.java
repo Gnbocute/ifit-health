@@ -114,4 +114,15 @@ class StudentActivitiesUiTest extends UiTestBase {
         page.toggle("MUSCULAÇÃO");
         assertThat(page.isSelectionBarVisible()).isFalse();
     }
+
+    @Test
+    @DisplayName("mostra o erro no diálogo quando as atividades escolhidas têm conflito de horário")
+    void shouldShowConflictError() {
+        gymOnMonday(12, 10);
+        StudentActivitiesPage page = openAsNewStudent().toggle(SWIMMING).toggle("MUSCULAÇÃO").openConfirmation()
+                .confirmExpectingError();
+
+        assertThat(page.dialogError()).isEqualTo("The selected activities have conflicting schedules");
+        assertThat(page.currentPath()).isEqualTo("/aluno/atividades");
+    }
 }
