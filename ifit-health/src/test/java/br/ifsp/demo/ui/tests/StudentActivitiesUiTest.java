@@ -80,4 +80,13 @@ class StudentActivitiesUiTest extends UiTestBase {
         assertThat(mine.tab(0)).isEqualTo("Ativas (1)");
         assertThat(mine.sports()).containsExactly(SWIMMING);
     }
+
+    @Test
+    @DisplayName("mantém a seleção ao fechar o diálogo com Voltar")
+    void shouldGoBackFromDialog() {
+        StudentActivitiesPage page = openAsNewStudent().toggle(SWIMMING).openConfirmation().backFromDialog();
+
+        assertThat(page.isSelected(SWIMMING)).isTrue();
+        assertThat(page.currentPath()).isEqualTo("/aluno/atividades");
+    }
 }
