@@ -277,4 +277,19 @@ class ActivityClassApiTest extends ApiTestBase {
                 .then().statusCode(409)
                 .body("message", equalTo("Room is already booked for the given schedule"));
     }
+
+    @Test
+    @DisplayName("retorna 409 quando o professor já está ocupado no horário")
+    void shouldRejectTrainerConflict() {
+        Map<String, Object> body = validRequest();
+        body.put("roomId", SeedData.ROOM_GYM.toString());
+        body.put("weekdays", List.of(DayOfWeek.MONDAY.name()));
+        body.put("startTime", "12:00:00");
+        body.put("endTime", "13:00:00");
+
+        asAdmin().body(body).when().post("/activity-classes")
+                .then().statusCode(409)
+                .body("message", equalTo("Trainer is already booked for the given schedule"));
+    }
+    
 }
