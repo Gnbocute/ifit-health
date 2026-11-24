@@ -198,4 +198,13 @@ class EnrollmentApiTest extends ApiTestBase {
 
         as(newStudent()).when().get("/me/enrollment").then().statusCode(404);
     }
+
+    @Test
+    @DisplayName("retorna 404 quando o aluno não tem matrícula")
+    void shouldReturnNotFoundWithoutEnrollment() {
+        as(newStudent()).when().get("/me/enrollment")
+                .then().statusCode(404)
+                .contentType(ContentType.JSON)
+                .body("message", equalTo("No enrollment was found for the authenticated student."));
+    }
 }
