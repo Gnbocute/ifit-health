@@ -75,4 +75,12 @@ class LoginUiTest extends UiTestBase {
         login.waitForPath("/");
         assertThat(login.isFormDisplayed()).isTrue();
     }
+
+    @Test
+    @DisplayName("redireciona usuário logado da tela de login para a área dele")
+    void shouldRedirectLoggedUser() {
+        loginAsAdmin();
+
+        new LoginPage(driver).visit().waitForPath("/admin/atividades");
+    }
 }
