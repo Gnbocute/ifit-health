@@ -53,4 +53,13 @@ class LoginUiTest extends UiTestBase {
         assertThat(login.toast()).isEqualTo("Sessão expirada ou credenciais inválidas.");
         assertThat(login.currentPath()).isEqualTo("/");
     }
+
+    @Test
+    @DisplayName("não envia e-mail inválido no login (validação do navegador)")
+    void shouldValidateEmailFormat() {
+        LoginPage login = loginPage().loginAs("aluno-sem-arroba", FakeData.password());
+
+        assertThat(login.emailValidationMessage()).isNotBlank();
+        assertThat(login.currentPath()).isEqualTo("/");
+    }
 }
