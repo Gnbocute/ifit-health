@@ -190,4 +190,12 @@ class EnrollmentApiTest extends ApiTestBase {
                 .body("customerId", equalTo(student.customerId().toString()))
                 .body("activities.enrollmentActivityId", contains(enrollmentActivityId));
     }
+
+    @Test
+    @DisplayName("não mostra a matrícula de outro aluno")
+    void shouldIsolateStudents() {
+        enrollInSwimming(newStudent());
+
+        as(newStudent()).when().get("/me/enrollment").then().statusCode(404);
+    }
 }
