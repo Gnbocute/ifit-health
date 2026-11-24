@@ -133,4 +133,15 @@ class EnrollmentApiTest extends ApiTestBase {
                 .then().statusCode(409)
                 .body("message", equalTo("The customer is already enrolled in this activity"));
     }
+
+    @Test
+    @DisplayName("retorna 409 quando a atividade não tem vagas")
+    void shouldRejectFullActivity() {
+        UUID gym = gymOnMonday(LocalTime.of(8, 0), LocalTime.of(9, 0), 1);
+        DbFixtures.fillActivity(gym, new BigDecimal("120"), 1);
+
+        as(newStudent()).body(enrollIn(gym)).when().post("/me/enrollment")
+                .then().statusCode(409)
+                .body("message", equalTo("The activity has no available vacancies: " + gym));
+    }
 }
