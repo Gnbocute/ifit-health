@@ -154,4 +154,16 @@ class EnrollmentApiTest extends ApiTestBase {
                 .then().statusCode(409)
                 .body("message", equalTo("The selected activities have conflicting schedules"));
     }
+
+    @Test
+    @DisplayName("retorna 409 quando a atividade conflita com outra que o aluno já faz")
+    void shouldRejectConflictWithCurrentActivity() {
+        Student student = newStudent();
+        enrollInSwimming(student);
+        UUID gym = gymOnMonday(LocalTime.of(12, 0), LocalTime.of(13, 0), 10);
+
+        as(student).body(enrollIn(gym)).when().post("/me/enrollment")
+                .then().statusCode(409)
+                .body("message", equalTo("The activity conflicts with the customer's schedule"));
+    }
 }
