@@ -3,6 +3,7 @@ package br.ifsp.demo.ui.tests;
 import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.SeedData;
 import br.ifsp.demo.ui.UiTestBase;
+import br.ifsp.demo.ui.pages.MyActivitiesPage;
 import br.ifsp.demo.ui.pages.StudentActivitiesPage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -65,5 +66,18 @@ class StudentActivitiesUiTest extends UiTestBase {
         assertThat(page.selectionSummary()).isEqualTo("2 selecionadas · R$ 300,00/mês");
         page.clearSelection();
         assertThat(page.isSelectionBarVisible()).isFalse();
+    }
+
+    @Test
+    @DisplayName("matricula após confirmar no diálogo e abre Minhas atividades")
+    void shouldEnroll() {
+        StudentActivitiesPage page = openAsNewStudent().toggle(SWIMMING).openConfirmation();
+        assertThat(page.dialogText()).contains("Confirmar matrícula").contains("Total mensal").contains("R$ 180,00");
+
+        MyActivitiesPage mine = page.confirm();
+
+        assertThat(mine.toast()).isEqualTo("Matrícula realizada!");
+        assertThat(mine.tab(0)).isEqualTo("Ativas (1)");
+        assertThat(mine.sports()).containsExactly(SWIMMING);
     }
 }
