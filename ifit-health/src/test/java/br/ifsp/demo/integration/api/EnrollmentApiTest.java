@@ -219,4 +219,19 @@ class EnrollmentApiTest extends ApiTestBase {
     void shouldRequireTokenToFindEnrollment() {
         anonymous().when().get("/me/enrollment").then().statusCode(401);
     }
+
+    @Test
+    @DisplayName("cancela a atividade com a data informada e desativa a matrícula")
+    void shouldCancelActivity() {
+        Student student = newStudent();
+        String enrollmentActivityId = enrollInSwimming(student);
+        LocalDate endDate = LocalDate.now().plusDays(10);
+
+        as(student).queryParam("endDate", endDate.toString())
+                .when().delete("/me/enrollment/activities/{id}", enrollmentActivityId)
+                .then().statusCode(200)
+                .body("active", is(false))
+                .body("activities[0].active", is(false))
+                .body("activities[0].endDate", equalTo(endDate.toString()));
+    }
 }
