@@ -116,4 +116,17 @@ class LoginUiTest extends UiTestBase {
 
         new AppShell(driver).waitForPath("/aluno/atividades");
     }
+
+    @Test
+    @DisplayName("adapta o login ao celular escondendo o banner e sem rolagem horizontal")
+    void shouldBeResponsive() {
+        LoginPage login = loginPage();
+        assertThat(login.isHeroDisplayed()).isTrue();
+
+        useMobileScreen();
+
+        assertThat(login.isHeroDisplayed()).isFalse();
+        assertThat(login.isFormDisplayed()).isTrue();
+        assertThat(login.hasHorizontalScroll()).isFalse();
+    }
 }
