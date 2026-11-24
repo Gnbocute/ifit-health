@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,6 +19,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("UI - Tela de atividades disponíveis (aluno)")
 class StudentActivitiesUiTest extends UiTestBase {
     private static final String SWIMMING = "NATAÇÃO";
+
+    private UUID gymOnMonday(int startHour, int capacity) {
+        return DbFixtures.insertActivity(SeedData.SPORT_WEIGHT_TRAINING, SeedData.ROOM_GYM, SeedData.TRAINER_JOHN,
+                LocalTime.of(startHour, 0), LocalTime.of(startHour + 1, 0), capacity, new BigDecimal("120"), true, DayOfWeek.MONDAY);
+    }
 
     private StudentActivitiesPage openAsNewStudent() {
         loginAsNewStudent();
@@ -45,5 +51,19 @@ class StudentActivitiesUiTest extends UiTestBase {
                 LocalTime.of(9, 0), LocalTime.of(10, 0), 10, new BigDecimal("90"), false, DayOfWeek.FRIDAY);
 
         assertThat(openAsNewStudent().sports()).containsExactly(SWIMMING);
+    }
+
+    @Test
+    @DisplayName("seleciona atividades, mostra o total mensal e limpa a seleção")
+    void shouldSelectActivities() {
+        gymOnMonday(8, 10);
+        StudentActivitiesPage page = openAsNewStudent();
+
+        page.toggle(SWIMMING).toggle("MUSCULAÇÃO");
+
+        assertThat(page.isSelected(SWIMMING)).isTrue();
+        assertThat(page.selectionSummary()).isEqualTo("2 selecionadas · R$ 300,00/mês");
+        page.clearSelection();
+        assertThat(page.isSelectionBarVisible()).isFalse();
     }
 }
