@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
 
@@ -55,5 +56,18 @@ class ActivityReportApiTest extends ApiTestBase {
                 .body(SWIMMING_ITEM + ".enrollmentCount", equalTo(2))
                 .body(SWIMMING_ITEM + ".revenue", isNumber(360))
                 .body(SWIMMING_ITEM + ".averageOccupancyPercent", isNumber(10.0));
+    }
+
+    @Test
+    @DisplayName("não conta matrícula encerrada antes do período do relatório")
+    void shouldIgnoreEnrollmentEndedBeforePeriod() {
+        UUID enrollment = DbFixtures.insertEnrollment(DbFixtures.insertCustomer(), true);
+        DbFixtures.insertEnrollmentActivity(enrollment, SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE,
+                LocalDate.of(2026, 1, 5), LocalDate.of(2026, 2, 10), false);
+
+        report(MARCH_1, MARCH_31)
+                .statusCode(200)
+                .body(SWIMMING_ITEM + ".enrollmentCount", equalTo(0))
+                .body(SWIMMING_ITEM + ".revenue", isNumber(0));
     }
 }
