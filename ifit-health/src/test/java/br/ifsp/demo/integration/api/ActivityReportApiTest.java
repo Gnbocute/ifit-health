@@ -1,6 +1,7 @@
 package br.ifsp.demo.integration.api;
 
 import br.ifsp.demo.support.ApiTestBase;
+import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.SeedData;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.http.ContentType;
@@ -41,5 +42,18 @@ class ActivityReportApiTest extends ApiTestBase {
                 .body(SWIMMING_ITEM + ".enrollmentCount", equalTo(0))
                 .body(SWIMMING_ITEM + ".revenue", isNumber(0))
                 .body(SWIMMING_ITEM + ".averageOccupancyPercent", isNumber(0));
+    }
+
+    @Test
+    @DisplayName("conta matrículas, soma receita e calcula ocupação no período de um mês")
+    void shouldCalculateValuesForEnrollmentsInThePeriod() {
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, MARCH_1);
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, MARCH_1);
+
+        report(MARCH_1, MARCH_31)
+                .statusCode(200)
+                .body(SWIMMING_ITEM + ".enrollmentCount", equalTo(2))
+                .body(SWIMMING_ITEM + ".revenue", isNumber(360))
+                .body(SWIMMING_ITEM + ".averageOccupancyPercent", isNumber(10.0));
     }
 }
