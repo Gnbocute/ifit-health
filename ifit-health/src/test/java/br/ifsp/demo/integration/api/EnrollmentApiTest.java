@@ -85,4 +85,12 @@ class EnrollmentApiTest extends ApiTestBase {
         assertThat(DbFixtures.count("SELECT COUNT(*) FROM enrollments WHERE customer_id = ?",
                 student.customerId().toString())).isEqualTo(1);
     }
+
+    @Test
+    @DisplayName("retorna 400 ao matricular com lista vazia")
+    void shouldRejectEmptyList() {
+        as(newStudent()).body(Map.of("activityClassIds", List.of())).when().post("/me/enrollment")
+                .then().statusCode(400)
+                .body("errors.activityClassIds", not(emptyOrNullString()));
+    }
 }
