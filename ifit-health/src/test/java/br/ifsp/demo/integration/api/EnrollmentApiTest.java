@@ -234,4 +234,15 @@ class EnrollmentApiTest extends ApiTestBase {
                 .body("activities[0].active", is(false))
                 .body("activities[0].endDate", equalTo(endDate.toString()));
     }
+
+    @Test
+    @DisplayName("usa a data atual quando endDate não é informado")
+    void shouldUseTodayByDefault() {
+        Student student = newStudent();
+        String enrollmentActivityId = enrollInSwimming(student);
+
+        as(student).when().delete("/me/enrollment/activities/{id}", enrollmentActivityId)
+                .then().statusCode(200)
+                .body("activities[0].endDate", equalTo(LocalDate.now().toString()));
+    }
 }
