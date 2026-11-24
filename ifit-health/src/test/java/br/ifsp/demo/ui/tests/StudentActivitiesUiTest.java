@@ -3,6 +3,7 @@ package br.ifsp.demo.ui.tests;
 import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.SeedData;
 import br.ifsp.demo.ui.UiTestBase;
+import br.ifsp.demo.ui.pages.AppShell;
 import br.ifsp.demo.ui.pages.MyActivitiesPage;
 import br.ifsp.demo.ui.pages.StudentActivitiesPage;
 import org.junit.jupiter.api.DisplayName;
@@ -124,5 +125,17 @@ class StudentActivitiesUiTest extends UiTestBase {
 
         assertThat(page.dialogError()).isEqualTo("The selected activities have conflicting schedules");
         assertThat(page.currentPath()).isEqualTo("/aluno/atividades");
+    }
+
+    @Test
+    @DisplayName("navega para Minhas atividades pelo menu lateral")
+    void shouldNavigateToMyActivities() {
+        openAsNewStudent();
+
+        new AppShell(driver).navigateTo("Minhas atividades");
+
+        MyActivitiesPage mine = new MyActivitiesPage(driver).waitUntilLoaded();
+        assertThat(mine.pageTitle()).isEqualTo(MyActivitiesPage.TITLE);
+        assertThat(mine.heading()).isEqualToIgnoringCase("Minhas atividades");
     }
 }
