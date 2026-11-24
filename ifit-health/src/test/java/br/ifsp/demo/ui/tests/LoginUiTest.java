@@ -1,5 +1,7 @@
 package br.ifsp.demo.ui.tests;
 
+import br.ifsp.demo.support.FakeData;
+import br.ifsp.demo.support.SeedData;
 import br.ifsp.demo.ui.UiTestBase;
 import br.ifsp.demo.ui.pages.AppShell;
 import br.ifsp.demo.ui.pages.LoginPage;
@@ -41,5 +43,14 @@ class LoginUiTest extends UiTestBase {
         AppShell shell = new AppShell(driver);
         assertThat(shell.area()).isEqualTo("ÁREA DO ALUNO");
         assertThat(shell.loggedUser()).isEqualTo(student.name() + " " + student.lastname());
+    }
+
+    @Test
+    @DisplayName("mostra erro e continua no login com senha errada")
+    void shouldRejectWrongPassword() {
+        LoginPage login = loginPage().loginAs(SeedData.ADMIN_EMAIL, FakeData.password());
+
+        assertThat(login.toast()).isEqualTo("Sessão expirada ou credenciais inválidas.");
+        assertThat(login.currentPath()).isEqualTo("/");
     }
 }
