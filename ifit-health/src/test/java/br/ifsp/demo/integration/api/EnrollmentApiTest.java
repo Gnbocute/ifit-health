@@ -144,4 +144,14 @@ class EnrollmentApiTest extends ApiTestBase {
                 .then().statusCode(409)
                 .body("message", equalTo("The activity has no available vacancies: " + gym));
     }
+
+    @Test
+    @DisplayName("retorna 409 quando as atividades escolhidas têm conflito de horário")
+    void shouldRejectConflictingSelection() {
+        UUID gym = gymOnMonday(LocalTime.of(12, 0), LocalTime.of(13, 0), 10);
+
+        as(newStudent()).body(enrollIn(SeedData.SWIMMING_CLASS, gym)).when().post("/me/enrollment")
+                .then().statusCode(409)
+                .body("message", equalTo("The selected activities have conflicting schedules"));
+    }
 }
