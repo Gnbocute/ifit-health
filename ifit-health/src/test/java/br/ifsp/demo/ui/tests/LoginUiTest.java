@@ -32,4 +32,14 @@ class LoginUiTest extends UiTestBase {
         assertThat(shell.area()).isEqualTo("ADMINISTRAÇÃO");
         assertThat(shell.toast()).isEqualTo("Bem-vindo(a), Administrador!");
     }
+
+    @Test
+    @DisplayName("abre a área do aluno ao entrar como aluno")
+    void shouldLoginAsStudent() {
+        StudentAccount student = loginAsNewStudent();
+
+        AppShell shell = new AppShell(driver);
+        assertThat(shell.area()).isEqualTo("ÁREA DO ALUNO");
+        assertThat(shell.loggedUser()).isEqualTo(student.name() + " " + student.lastname());
+    }
 }
