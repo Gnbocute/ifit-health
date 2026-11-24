@@ -286,4 +286,16 @@ class EnrollmentApiTest extends ApiTestBase {
                 .body("active", is(true))
                 .body("activities", hasSize(2));
     }
+
+    @Test
+    @DisplayName("retorna 409 ao cancelar atividade já inativa")
+    void shouldRejectAlreadyCanceledActivity() {
+        Student student = newStudent();
+        String enrollmentActivityId = enrollInSwimming(student);
+        as(student).when().delete("/me/enrollment/activities/{id}", enrollmentActivityId).then().statusCode(200);
+
+        as(student).when().delete("/me/enrollment/activities/{id}", enrollmentActivityId)
+                .then().statusCode(409)
+                .body("message", equalTo("Enrollment activity is already inactive"));
+    }
 }
