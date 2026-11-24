@@ -166,4 +166,10 @@ class EnrollmentApiTest extends ApiTestBase {
                 .then().statusCode(409)
                 .body("message", equalTo("The activity conflicts with the customer's schedule"));
     }
+
+    @Test
+    @DisplayName("retorna 403 para o administrador ao matricular")
+    void shouldForbidAdminToEnroll() {
+        asAdmin().body(enrollIn(SeedData.SWIMMING_CLASS)).when().post("/me/enrollment").then().statusCode(403);
+    }
 }
