@@ -303,4 +303,15 @@ class ActivityClassApiTest extends ApiTestBase {
 
         asAdmin().body(body).when().post("/activity-classes").then().statusCode(201);
     }
+
+    @Test
+    @DisplayName("retorna 403 para aluno ao criar atividade")
+    void shouldForbidStudentsToCreate() {
+        int countBefore = DbFixtures.count("SELECT COUNT(*) FROM activity_class");
+
+        as(newStudent()).body(validRequest()).when().post("/activity-classes")
+            .then().statusCode(403);
+
+        assertThat(DbFixtures.count("SELECT COUNT(*) FROM activity_class")).isEqualTo(countBefore);
+    }
 }
