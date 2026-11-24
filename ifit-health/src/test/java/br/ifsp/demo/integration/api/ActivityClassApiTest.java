@@ -244,4 +244,14 @@ class ActivityClassApiTest extends ApiTestBase {
         asAdmin().body(body).when().post("/activity-classes").then().statusCode(404)
             .body("message", equalTo(referenceName + " not found: " + unknown));
     }
+
+    @Test
+    @DisplayName("retorna 409 quando o tipo de sala não serve para a modalidade")
+    void shouldRejectRoomTypeMismatch() {
+        Map<String, Object> body = validRequest();
+        body.put("roomId", SeedData.ROOM_GYM.toString());
+
+        asAdmin().body(body).when().post("/activity-classes").then().statusCode(409)
+            .body("message", equalTo("Room type does not match sport requirements"));
+    }
 }
