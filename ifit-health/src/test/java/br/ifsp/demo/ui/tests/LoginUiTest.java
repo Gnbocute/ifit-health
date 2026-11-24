@@ -8,6 +8,7 @@ import br.ifsp.demo.ui.pages.AppShell;
 import br.ifsp.demo.ui.pages.LoginPage;
 import br.ifsp.demo.ui.pages.MyActivitiesPage;
 import br.ifsp.demo.ui.pages.RegisterPage;
+import br.ifsp.demo.ui.pages.ReportsPage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -104,5 +105,15 @@ class LoginUiTest extends UiTestBase {
         new MyActivitiesPage(driver).visit();
 
         new LoginPage(driver).waitForPath("/");
+    }
+
+    @Test
+    @DisplayName("manda de volta para a área do aluno quem abre tela de admin")
+    void shouldBlockAdminScreensForStudents() {
+        loginAsNewStudent();
+
+        new ReportsPage(driver).visit();
+
+        new AppShell(driver).waitForPath("/aluno/atividades");
     }
 }
