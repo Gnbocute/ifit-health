@@ -261,4 +261,16 @@ class EnrollmentApiTest extends ApiTestBase {
                 .body("active", is(true))
                 .body("activities.findAll { it.active }.activityClassId", contains(gym.toString()));
     }
+
+    @Test
+    @DisplayName("libera a vaga da atividade cancelada")
+    void shouldFreeSpot() {
+        Student student = newStudent();
+        String enrollmentActivityId = enrollInSwimming(student);
+
+        as(student).when().delete("/me/enrollment/activities/{id}", enrollmentActivityId).then().statusCode(200);
+
+        asAdmin().when().get("/activity-classes")
+                .then().body("[0].availableSpots", equalTo(SeedData.SWIMMING_CAPACITY));
+    }
 }
