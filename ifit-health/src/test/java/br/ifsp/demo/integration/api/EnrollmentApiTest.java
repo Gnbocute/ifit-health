@@ -101,4 +101,14 @@ class EnrollmentApiTest extends ApiTestBase {
                 .then().statusCode(400)
                 .body("message", equalTo("The same activity cannot be selected more than once."));
     }
+
+    @Test
+    @DisplayName("retorna 404 ao matricular em atividade desconhecida")
+    void shouldRejectUnknownActivity() {
+        UUID unknown = UUID.randomUUID();
+
+        as(newStudent()).body(enrollIn(unknown)).when().post("/me/enrollment")
+                .then().statusCode(404)
+                .body("message", equalTo("Activity class not found: " + unknown));
+    }
 }
