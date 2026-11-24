@@ -138,4 +138,17 @@ class StudentActivitiesUiTest extends UiTestBase {
         assertThat(mine.pageTitle()).isEqualTo(MyActivitiesPage.TITLE);
         assertThat(mine.heading()).isEqualToIgnoringCase("Minhas atividades");
     }
+
+    @Test
+    @DisplayName("mantém cards e barra de seleção usáveis na tela de celular")
+    void shouldBeResponsive() {
+        StudentActivitiesPage page = openAsNewStudent();
+        useMobileScreen();
+
+        page.toggle(SWIMMING);
+
+        assertThat(page.isSelectionBarVisible()).isTrue();
+        assertThat(page.hasHorizontalScroll()).isFalse();
+        assertThat(page.openConfirmation().confirm().sports()).containsExactly(SWIMMING);
+    }
 }
