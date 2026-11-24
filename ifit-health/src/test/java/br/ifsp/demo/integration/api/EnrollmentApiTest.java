@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @Tag("ApiTest")
@@ -29,6 +30,12 @@ class EnrollmentApiTest extends ApiTestBase {
     private UUID gymOnMonday(LocalTime start, LocalTime end, int capacity) {
         return DbFixtures.insertActivity(SeedData.SPORT_WEIGHT_TRAINING, SeedData.ROOM_GYM, SeedData.TRAINER_JOHN,
                 start, end, capacity, new BigDecimal("120"), true, DayOfWeek.MONDAY);
+    }
+
+    private String enrollInSwimming(Student student) {
+        return as(student).body(enrollIn(SeedData.SWIMMING_CLASS)).when().post("/me/enrollment")
+                .then().statusCode(201)
+                .extract().path("activities[0].enrollmentActivityId");
     }
 
     @Test
@@ -62,5 +69,20 @@ class EnrollmentApiTest extends ApiTestBase {
 
         asAdmin().when().get("/activity-classes")
                 .then().body("find { it.id == '%s' }.availableSpots".formatted(gym), equalTo(9));
+    }
+
+    @Test
+    @DisplayName("adiciona nova atividade a uma matrícula existente")
+    void shouldAddActivityToExistingEnrollment() {
+        Student student = newStudent();
+        enrollInSwimming(student);
+        UUID gym = gymOnMonday(LocalTime.of(8, 0), LocalTime.of(9, 0), 10);
+
+        as(student).body(enrollIn(gym)).when().post("/me/enrollment")
+                .then().statusCode(201)
+                .body("activities", hasSize(2));
+
+        assertThat(DbFixtures.count("SELECT COUNT(*) FROM enrollments WHERE customer_id = ?",
+                student.customerId().toString())).isEqualTo(1);
     }
 }
