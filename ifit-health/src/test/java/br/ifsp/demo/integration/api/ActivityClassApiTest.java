@@ -288,8 +288,19 @@ class ActivityClassApiTest extends ApiTestBase {
         body.put("endTime", "13:00:00");
 
         asAdmin().body(body).when().post("/activity-classes")
-                .then().statusCode(409)
-                .body("message", equalTo("Trainer is already booked for the given schedule"));
+            .then().statusCode(409)
+            .body("message", equalTo("Trainer is already booked for the given schedule"));
     }
-    
+
+    @Test
+    @DisplayName("permite aulas seguidas na mesma sala")
+    void shouldAllowAdjacentSchedules() {
+        Map<String, Object> body = validRequest();
+        body.put("trainerId", SeedData.TRAINER_MARIA.toString());
+        body.put("weekdays", List.of(DayOfWeek.MONDAY.name()));
+        body.put("startTime", "12:30:00");
+        body.put("endTime", "13:30:00");
+
+        asAdmin().body(body).when().post("/activity-classes").then().statusCode(201);
+    }
 }
