@@ -214,4 +214,18 @@ class ActivityClassApiTest extends ApiTestBase {
         asAdmin().body(body).when().post("/activity-classes").then().statusCode(400)
             .body("message", equalTo("Schedule must be between 06:00 and 22:00"));
     }
+
+    @ParameterizedTest(name = "[{index}] {0}-{1}")
+    @CsvSource({
+        "06:00:00, 06:30:00",
+        "21:30:00, 22:00:00"
+    })
+    @DisplayName("aceita os limites 06:00 e 22:00 ao criar atividade")
+    void shouldAcceptOpeningHourLimits(String startTime, String endTime) {
+        Map<String, Object> body = validRequest();
+        body.put("startTime", startTime);
+        body.put("endTime", endTime);
+
+        asAdmin().body(body).when().post("/activity-classes").then().statusCode(201);
+    }
 }
