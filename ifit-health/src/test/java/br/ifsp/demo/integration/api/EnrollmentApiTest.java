@@ -172,4 +172,10 @@ class EnrollmentApiTest extends ApiTestBase {
     void shouldForbidAdminToEnroll() {
         asAdmin().body(enrollIn(SeedData.SWIMMING_CLASS)).when().post("/me/enrollment").then().statusCode(403);
     }
+
+    @Test
+    @DisplayName("retorna 401 ao matricular sem token")
+    void shouldRequireTokenToEnroll() {
+        anonymous().body(enrollIn(SeedData.SWIMMING_CLASS)).when().post("/me/enrollment").then().statusCode(401);
+    }
 }
