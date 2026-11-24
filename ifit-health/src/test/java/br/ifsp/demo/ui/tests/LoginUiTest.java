@@ -5,6 +5,7 @@ import br.ifsp.demo.support.SeedData;
 import br.ifsp.demo.ui.UiTestBase;
 import br.ifsp.demo.ui.pages.AppShell;
 import br.ifsp.demo.ui.pages.LoginPage;
+import br.ifsp.demo.ui.pages.RegisterPage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -61,5 +62,17 @@ class LoginUiTest extends UiTestBase {
 
         assertThat(login.emailValidationMessage()).isNotBlank();
         assertThat(login.currentPath()).isEqualTo("/");
+    }
+
+    @Test
+    @DisplayName("vai para o cadastro pelo link da tela de login")
+    void shouldGoToRegister() {
+        RegisterPage register = loginPage().goToRegister();
+
+        assertThat(register.pageTitle()).isEqualTo(RegisterPage.TITLE);
+        assertThat(register.currentPath()).isEqualTo("/cadastro");
+        LoginPage login = register.backToLogin();
+        login.waitForPath("/");
+        assertThat(login.isFormDisplayed()).isTrue();
     }
 }
