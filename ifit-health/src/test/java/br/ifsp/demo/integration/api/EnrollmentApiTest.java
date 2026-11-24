@@ -207,4 +207,10 @@ class EnrollmentApiTest extends ApiTestBase {
                 .contentType(ContentType.JSON)
                 .body("message", equalTo("No enrollment was found for the authenticated student."));
     }
+
+    @Test
+    @DisplayName("retorna 403 para o administrador ao consultar matrícula")
+    void shouldForbidAdminToFindEnrollment() {
+        asAdmin().when().get("/me/enrollment").then().statusCode(403);
+    }
 }
