@@ -309,4 +309,15 @@ class EnrollmentApiTest extends ApiTestBase {
                 .when().delete("/me/enrollment/activities/{id}", enrollmentActivityId)
                 .then().statusCode(409);
     }
+
+    @Test
+    @DisplayName("retorna 404 ao cancelar atividade que não está na matrícula do aluno")
+    void shouldRejectUnknownEnrollmentActivity() {
+        Student student = newStudent();
+        enrollInSwimming(student);
+
+        as(student).when().delete("/me/enrollment/activities/{id}", UUID.randomUUID())
+                .then().statusCode(404)
+                .body("message", equalTo("Enrollment activity not found"));
+    }
 }
