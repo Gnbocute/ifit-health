@@ -228,4 +228,20 @@ class ActivityClassApiTest extends ApiTestBase {
 
         asAdmin().body(body).when().post("/activity-classes").then().statusCode(201);
     }
+
+    @ParameterizedTest(name = "[{index}] referencia desconhecida: {0}")
+    @CsvSource({
+        "roomId, Room",
+        "sportId, Sport",
+        "trainerId, Trainer"
+    })
+    @DisplayName("retorna 404 para sala, modalidade ou professor desconhecido")
+    void shouldRejectUnknownReferences(String field, String referenceName) {
+        UUID unknown = UUID.randomUUID();
+        Map<String, Object> body = validRequest();
+        body.put(field, unknown.toString());
+
+        asAdmin().body(body).when().post("/activity-classes").then().statusCode(404)
+            .body("message", equalTo(referenceName + " not found: " + unknown));
+    }
 }
