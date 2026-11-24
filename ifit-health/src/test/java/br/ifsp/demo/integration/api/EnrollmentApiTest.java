@@ -178,4 +178,16 @@ class EnrollmentApiTest extends ApiTestBase {
     void shouldRequireTokenToEnroll() {
         anonymous().body(enrollIn(SeedData.SWIMMING_CLASS)).when().post("/me/enrollment").then().statusCode(401);
     }
+
+    @Test
+    @DisplayName("retorna a matrícula do aluno autenticado")
+    void shouldReturnEnrollment() {
+        Student student = newStudent();
+        String enrollmentActivityId = enrollInSwimming(student);
+
+        as(student).when().get("/me/enrollment")
+                .then().statusCode(200)
+                .body("customerId", equalTo(student.customerId().toString()))
+                .body("activities.enrollmentActivityId", contains(enrollmentActivityId));
+    }
 }
