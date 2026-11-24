@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.math.BigDecimal;
@@ -197,5 +198,20 @@ class ActivityClassApiTest extends ApiTestBase {
 
         asAdmin().body(body).when().post("/activity-classes").then().statusCode(400)
             .body("message", equalTo("End time must be after start time"));
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}-{1}")
+    @CsvSource({
+        "05:00:00, 06:30:00",
+        "21:30:00, 22:01:00"
+    })
+    @DisplayName("retorna 400 para horário fora de 06:00-22:00")
+    void shouldRejectScheduleOutsideOpeningHours(String startTime, String endTime) {
+        Map<String, Object> body = validRequest();
+        body.put("startTime", startTime);
+        body.put("endTime", endTime);
+
+        asAdmin().body(body).when().post("/activity-classes").then().statusCode(400)
+            .body("message", equalTo("Schedule must be between 06:00 and 22:00"));
     }
 }
