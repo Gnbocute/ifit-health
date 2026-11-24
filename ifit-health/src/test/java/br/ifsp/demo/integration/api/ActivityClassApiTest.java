@@ -8,6 +8,9 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
@@ -16,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -158,5 +162,29 @@ class ActivityClassApiTest extends ApiTestBase {
         body.put("capacity", 12);
         body.put("monthlyFee", 150.00);
         return body;
+    }
+
+    static Stream<Arguments> invalidFields() {
+        return Stream.of(
+            Arguments.of("sportId", null),
+            Arguments.of("roomId", null),
+            Arguments.of("trainerId", null),
+            Arguments.of("weekdays", List.of()),
+            Arguments.of("startTime", null),
+            Arguments.of("endTime", null),
+            Arguments.of("capacity", 0),
+            Arguments.of("monthlyFee", null),
+            Arguments.of("monthlyFee", new BigDecimal("-1.00")));
+    }
+
+    @ParameterizedTest(name = "[{index}] {0} = {1}")
+    @MethodSource("invalidFields")
+    @DisplayName("retorna 400 e identifica o campo inválido ao criar atividade")
+    void shouldRejectInvalidFieldOnCreate(String field, Object value) {
+        Map<String, Object> body = validRequest();
+        body.put(field, value);
+
+        asAdmin().body(body).when().post("/activity-classes").then().statusCode(400)
+            .body("errors." + field, not(emptyOrNullString()));
     }
 }
