@@ -3,6 +3,7 @@ package br.ifsp.demo.ui.tests;
 import br.ifsp.demo.support.FakeData;
 import br.ifsp.demo.support.SeedData;
 import br.ifsp.demo.ui.UiTestBase;
+import br.ifsp.demo.ui.pages.AdminActivitiesPage;
 import br.ifsp.demo.ui.pages.AppShell;
 import br.ifsp.demo.ui.pages.LoginPage;
 import br.ifsp.demo.ui.pages.RegisterPage;
@@ -82,5 +83,17 @@ class LoginUiTest extends UiTestBase {
         loginAsAdmin();
 
         new LoginPage(driver).visit().waitForPath("/admin/atividades");
+    }
+
+    @Test
+    @DisplayName("sai da conta e bloqueia a área do admin depois")
+    void shouldLogout() {
+        loginAsAdmin();
+
+        LoginPage login = new AppShell(driver).logout();
+        assertThat(login.isFormDisplayed()).isTrue();
+
+        new AdminActivitiesPage(driver).visit();
+        login.waitForPath("/");
     }
 }
