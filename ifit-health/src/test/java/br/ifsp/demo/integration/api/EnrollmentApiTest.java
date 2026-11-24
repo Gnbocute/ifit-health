@@ -273,4 +273,17 @@ class EnrollmentApiTest extends ApiTestBase {
         asAdmin().when().get("/activity-classes")
                 .then().body("[0].availableSpots", equalTo(SeedData.SWIMMING_CAPACITY));
     }
+
+    @Test
+    @DisplayName("permite nova matrícula na atividade depois de cancelar")
+    void shouldAllowReenrollmentAfterCancel() {
+        Student student = newStudent();
+        String enrollmentActivityId = enrollInSwimming(student);
+        as(student).when().delete("/me/enrollment/activities/{id}", enrollmentActivityId).then().statusCode(200);
+
+        as(student).body(enrollIn(SeedData.SWIMMING_CLASS)).when().post("/me/enrollment")
+                .then().statusCode(201)
+                .body("active", is(true))
+                .body("activities", hasSize(2));
+    }
 }
