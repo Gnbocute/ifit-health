@@ -80,4 +80,14 @@ class ActivityReportApiTest extends ApiTestBase {
                 .statusCode(200)
                 .body(SWIMMING_ITEM + ".revenue", isNumber(540));
     }
+
+    @Test
+    @DisplayName("conta o aluno uma vez só mesmo em período de vários meses")
+    void shouldCountEachStudentOnce() {
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, LocalDate.of(2026, 1, 1));
+
+        report(LocalDate.of(2026, 1, 1), MARCH_31)
+                .statusCode(200)
+                .body(SWIMMING_ITEM + ".enrollmentCount", equalTo(1));
+    }
 }
