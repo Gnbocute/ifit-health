@@ -254,4 +254,15 @@ class ActivityClassApiTest extends ApiTestBase {
         asAdmin().body(body).when().post("/activity-classes").then().statusCode(409)
             .body("message", equalTo("Room type does not match sport requirements"));
     }
+
+    @Test
+    @DisplayName("retorna 409 quando a capacidade passa a da sala")
+    void shouldRejectCapacityAboveRoomLimit() {
+        Map<String, Object> body = validRequest();
+        body.put("roomId", SeedData.ROOM_POOL.toString());
+        body.put("capacity", SeedData.ROOM_POOL_CAPACITY + 1);
+
+        asAdmin().body(body).when().post("/activity-classes").then().statusCode(409)
+            .body("message", equalTo("Capacity exceeds room limit"));
+    }
 }
