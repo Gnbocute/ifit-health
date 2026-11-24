@@ -298,4 +298,15 @@ class EnrollmentApiTest extends ApiTestBase {
                 .then().statusCode(409)
                 .body("message", equalTo("Enrollment activity is already inactive"));
     }
+
+    @Test
+    @DisplayName("retorna 409, como documentado, para cancelamento antes da data de início")
+    void shouldRejectDateBeforeStart() {
+        Student student = newStudent();
+        String enrollmentActivityId = enrollInSwimming(student);
+
+        as(student).queryParam("endDate", LocalDate.now().minusDays(1).toString())
+                .when().delete("/me/enrollment/activities/{id}", enrollmentActivityId)
+                .then().statusCode(409);
+    }
 }
