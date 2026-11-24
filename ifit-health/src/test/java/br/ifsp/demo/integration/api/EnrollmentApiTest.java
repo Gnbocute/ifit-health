@@ -93,4 +93,12 @@ class EnrollmentApiTest extends ApiTestBase {
                 .then().statusCode(400)
                 .body("errors.activityClassIds", not(emptyOrNullString()));
     }
+
+    @Test
+    @DisplayName("retorna 400 quando a mesma atividade é escolhida duas vezes")
+    void shouldRejectDuplicatedActivity() {
+        as(newStudent()).body(enrollIn(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_CLASS)).when().post("/me/enrollment")
+                .then().statusCode(400)
+                .body("message", equalTo("The same activity cannot be selected more than once."));
+    }
 }
