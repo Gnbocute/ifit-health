@@ -5,6 +5,8 @@ import br.ifsp.demo.support.SeedData;
 import br.ifsp.demo.ui.UiTestBase;
 import br.ifsp.demo.ui.pages.ActivityFormPage;
 import br.ifsp.demo.ui.pages.AdminActivitiesPage;
+import br.ifsp.demo.ui.pages.AppShell;
+import br.ifsp.demo.ui.pages.ReportsPage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -62,5 +64,17 @@ class AdminActivitiesUiTest extends UiTestBase {
         ActivityFormPage editForm = page.open().edit(SeedData.SWIMMING_NAME);
         assertThat(editForm.pageTitle()).isEqualTo(ActivityFormPage.EDIT_TITLE);
         assertThat(editForm.currentPath()).isEqualTo("/admin/atividades/" + SeedData.SWIMMING_CLASS);
+    }
+
+    @Test
+    @DisplayName("navega para os relatórios pelo menu lateral")
+    void shouldNavigateToReports() {
+        loginAsAdmin();
+
+        new AppShell(driver).navigateTo("Relatórios");
+
+        ReportsPage reports = new ReportsPage(driver).waitUntilLoaded();
+        assertThat(reports.pageTitle()).isEqualTo(ReportsPage.TITLE);
+        assertThat(reports.heading()).isEqualToIgnoringCase("Relatórios");
     }
 }
