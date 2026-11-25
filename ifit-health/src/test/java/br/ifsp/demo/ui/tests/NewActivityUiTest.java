@@ -70,4 +70,12 @@ class NewActivityUiTest extends UiTestBase {
 
         assertThat(form.formErrors()).containsExactly("Capacidade excede o limite da sala (30).");
     }
+
+    @Test
+    @DisplayName("rejeita sala que não serve para a modalidade")
+    void shouldRejectRoomTypeMismatch() {
+        form.fill("Natação", "Sala de Musculação", "John Doe", List.of("Sexta"), "08:00", "09:00", "10", "100").submit();
+
+        assertThat(form.formErrors()).containsExactly("A modalidade Natação exige sala do tipo Piscina.");
+    }
 }
