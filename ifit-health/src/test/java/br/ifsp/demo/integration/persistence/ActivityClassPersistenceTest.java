@@ -157,4 +157,13 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
 
         assertThat(activityClassRepository.findPriceHistory(legacy)).extracting(BigDecimal::intValue).containsExactly(90, 95);
     }
+
+    @Test
+    @DisplayName("usa o valor padrão quando não há histórico de preço")
+    void shouldReturnFallbackPrice() {
+        UUID legacy = DbFixtures.insertActivity(SeedData.SPORT_JUDO, SeedData.ROOM_JUDO, SeedData.TRAINER_CARLOS,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), 10, new BigDecimal("90"), true, DayOfWeek.FRIDAY);
+
+        assertThat(activityClassRepository.findLatestPrice(legacy, new BigDecimal("77"))).isEqualByComparingTo("77");
+    }
 }
