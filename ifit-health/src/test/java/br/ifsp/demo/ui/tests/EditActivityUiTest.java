@@ -1,0 +1,33 @@
+package br.ifsp.demo.ui.tests;
+
+import br.ifsp.demo.support.SeedData;
+import br.ifsp.demo.ui.UiTestBase;
+import br.ifsp.demo.ui.pages.ActivityFormPage;
+import br.ifsp.demo.ui.pages.AdminActivitiesPage;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@Tag("UiTest")
+@DisplayName("UI - Tela de edição de atividade")
+class EditActivityUiTest extends UiTestBase {
+    private ActivityFormPage openSwimming() {
+        loginAsAdmin();
+        return new AdminActivitiesPage(driver).waitUntilLoaded().edit(SeedData.SWIMMING_NAME);
+    }
+
+    @Test
+    @DisplayName("carrega os dados atuais da atividade na edição")
+    void shouldLoadCurrentData() {
+        ActivityFormPage form = openSwimming();
+
+        assertThat(form.selectedSport()).isEqualTo(SeedData.SWIMMING_NAME);
+        assertThat(form.selectedRoom()).startsWith("Piscina");
+        assertThat(form.selectedTrainer()).isEqualTo(SeedData.TRAINER_JULIANA_NAME);
+        assertThat(form.startTime()).isEqualTo("11:30");
+        assertThat(form.capacity()).isEqualTo("20");
+        assertThat(form.monthlyFee()).isEqualTo("180");
+    }
+}
