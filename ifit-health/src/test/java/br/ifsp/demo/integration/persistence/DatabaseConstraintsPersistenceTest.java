@@ -29,4 +29,12 @@ class DatabaseConstraintsPersistenceTest extends PersistenceTestBase {
         assertRejected(INSERT_USER, UUID.randomUUID().toString(), FakeData.email(), "MANAGER")
                 .hasMessageContaining("CHECK constraint failed");
     }
+
+    @Test
+    @DisplayName("exige CPF único em customers")
+    void shouldRejectDuplicatedCpf() {
+        assertRejected("INSERT INTO customers (id, cpf, name, birthdate, gender, email) VALUES (?, ?, 'X', '2000-01-01', 'MALE', ?)",
+                UUID.randomUUID().toString(), SeedData.ANA_CPF, FakeData.email())
+                .hasMessageContaining("UNIQUE constraint failed: customers.cpf");
+    }
 }
