@@ -89,4 +89,17 @@ class UserAndCustomerPersistenceTest extends PersistenceTestBase {
         assertThat(found.getAddress().getCity()).isEqualTo("São Carlos");
         assertThat(found.getUserId()).isNull();
     }
+
+    @Test
+    @DisplayName("atualiza cliente existente ao salvar (ON CONFLICT)")
+    void shouldUpdateExistingCustomer() {
+        Customer ana = customer(SeedData.ANA_CUSTOMER_ID);
+        Customer changed = new Customer(ana.getId(), ana.getUserId(), ana.getCpf(), "Ana Souza Lima", ana.getBirthdate(),
+                ana.getGender(), ana.getTel(), ana.getEmail(), ana.getAddress(), ana.getCreatedAt(), ana.getUpdatedAt());
+
+        customerRepository.save(changed);
+
+        assertThat(customer(SeedData.ANA_CUSTOMER_ID).getName()).isEqualTo("Ana Souza Lima");
+        assertThat(DbFixtures.count("SELECT COUNT(*) FROM customers")).isEqualTo(2);
+    }
 }
