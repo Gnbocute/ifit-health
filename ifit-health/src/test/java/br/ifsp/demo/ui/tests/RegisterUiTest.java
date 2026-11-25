@@ -48,4 +48,20 @@ class RegisterUiTest extends UiTestBase {
         assertThat(DbFixtures.text("SELECT address_city || '/' || address_state || '/' || address_cep FROM customers WHERE email = ?", email))
                 .isEqualTo(city + "/SP/13560-000");
     }
+
+    @Test
+    @DisplayName("lista todos os campos obrigatórios com o cadastro vazio")
+    void shouldShowRequiredErrors() {
+        RegisterPage register = new RegisterPage(driver).open().submit();
+
+        assertThat(register.formErrors()).contains(
+                "O nome é obrigatório.",
+                "O sobrenome é obrigatório.",
+                "Informe um e-mail válido.",
+                "A senha deve ter entre 8 e 72 caracteres.",
+                "Informe um CPF válido.",
+                "A data de nascimento é obrigatória.",
+                "O gênero é obrigatório.");
+        assertThat(register.currentPath()).isEqualTo("/cadastro");
+    }
 }
