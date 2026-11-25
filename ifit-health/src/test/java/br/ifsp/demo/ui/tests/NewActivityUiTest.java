@@ -39,4 +39,19 @@ class NewActivityUiTest extends UiTestBase {
         assertThat(list.cell("Musculação", 5)).isEqualTo("R$ " + fee + ",00");
         assertThat(DbFixtures.count("SELECT COUNT(*) FROM activity_class")).isEqualTo(2);
     }
+
+    @Test
+    @DisplayName("lista todos os campos obrigatórios com o formulário vazio")
+    void shouldShowRequiredErrors() {
+        form.submit();
+
+        assertThat(form.formErrors()).containsExactly("Selecione a modalidade.",
+            "Selecione a sala.",
+            "Selecione o professor.",
+            "Selecione ao menos um dia da semana.",
+            "Informe horário de início e fim.",
+            "Capacidade deve ser um número inteiro positivo.",
+            "Mensalidade deve ser maior ou igual a zero.");
+        assertThat(form.currentPath()).isEqualTo("/admin/atividades/nova");
+    }
 }
