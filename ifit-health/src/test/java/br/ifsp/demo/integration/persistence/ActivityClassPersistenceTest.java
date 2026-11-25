@@ -73,4 +73,14 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
         assertThat(activityClassRepository.findByRoom(room)).extracting(ActivityClass::getId).containsExactly(SeedData.SWIMMING_CLASS);
         assertThat(activityClassRepository.findByTrainer(trainer)).extracting(ActivityClass::getId).containsExactly(SeedData.SWIMMING_CLASS);
     }
+
+    @Test
+    @DisplayName("findAll do repositório retorna atividades ativas e inativas")
+    void shouldFindAllActivities() {
+        UUID inactive = DbFixtures.insertActivity(SeedData.SPORT_JUDO, SeedData.ROOM_JUDO, SeedData.TRAINER_CARLOS,
+            LocalTime.of(9, 0), LocalTime.of(10, 0), 10, new BigDecimal("90"), false, DayOfWeek.FRIDAY);
+
+        assertThat(activityClassRepository.findAll()).extracting(ActivityClass::getId)
+            .containsExactlyInAnyOrder(SeedData.SWIMMING_CLASS, inactive);
+    }
 }
