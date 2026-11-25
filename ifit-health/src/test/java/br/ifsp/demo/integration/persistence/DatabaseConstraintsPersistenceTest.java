@@ -163,4 +163,12 @@ class DatabaseConstraintsPersistenceTest extends PersistenceTestBase {
         assertRejected("INSERT INTO rooms (id, name, room_type, capacity) VALUES (?, 'Piscina', 'POOL', 10)", UUID.randomUUID().toString())
                 .hasMessageContaining("UNIQUE constraint failed: rooms.name");
     }
+
+    @Test
+    @DisplayName("exige capacidade de sala maior que zero")
+    void shouldRejectRoomWithoutCapacity() {
+        assertRejected("INSERT INTO rooms (id, name, room_type, capacity) VALUES (?, ?, 'GYM', 0)",
+                UUID.randomUUID().toString(), FakeData.faker().lorem().word() + UUID.randomUUID())
+                .hasMessageContaining("CHECK constraint failed");
+    }
 }
