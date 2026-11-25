@@ -7,7 +7,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
+
+import java.text.Collator;
+import java.util.Locale;
+import java.util.List;
 
 @Tag("ApiTest")
 @Tag("IntegrationTest")
@@ -42,5 +47,13 @@ class CatalogApiTest extends ApiTestBase {
             .body("size()", equalTo(SeedData.TRAINERS_COUNT))
             .body("find { it.id == '%s' }.name".formatted(SeedData.TRAINER_JULIANA), equalTo(SeedData.TRAINER_JULIANA_NAME))
             .body("active", everyItem(is(true)));
+    }
+
+    @Test
+    @DisplayName("retorna professores em ordem alfabética")
+    void shouldSortTrainersByName() {
+        List<String> names = asAdmin().when().get("/trainers").then().statusCode(200).extract().path("name");
+
+        assertThat(names).isSortedAccordingTo(Collator.getInstance(Locale.forLanguageTag("pt-BR")));
     }
 }
