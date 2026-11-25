@@ -237,4 +237,14 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
         assertThat(row(SeedData.SWIMMING_CLASS, true).monthlyFee()).isEqualByComparingTo("250");
         assertThat(activityQueries.findLatestPrice(SeedData.SWIMMING_CLASS, BigDecimal.ZERO)).isEqualByComparingTo("250");
     }
+
+    @Test
+    @DisplayName("usa o preço mais recente já em vigor (MAX valid_from <= hoje)")
+    void shouldUseMostRecentPriceInForce() {
+        DbFixtures.insertPrice(SeedData.SWIMMING_CLASS, new BigDecimal("170"), LocalDate.now().minusMonths(3));
+        DbFixtures.insertPrice(SeedData.SWIMMING_CLASS, new BigDecimal("190"), LocalDate.now().minusDays(1));
+        DbFixtures.insertPrice(SeedData.SWIMMING_CLASS, new BigDecimal("260"), NEXT_MONTH);
+
+        assertThat(row(SeedData.SWIMMING_CLASS, false).monthlyFee()).isEqualByComparingTo("190");
+    }
 }
