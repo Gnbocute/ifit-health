@@ -23,4 +23,15 @@ class CatalogApiTest extends ApiTestBase {
             .body("find { it.id == '%s' }.description".formatted(SeedData.SPORT_SWIMMING), not(emptyOrNullString()))
             .body("active", everyItem(is(true)));
     }
+
+    @Test
+    @DisplayName("retorna todas as salas com tipo e capacidade")
+    void shouldListRooms() {
+        asAdmin().when().get("/rooms").then().statusCode(200)
+            .body("size()", equalTo(SeedData.ROOMS_COUNT))
+            .body("find { it.id == '%s' }.name".formatted(SeedData.ROOM_POOL), equalTo("Piscina"))
+            .body("find { it.id == '%s' }.roomType".formatted(SeedData.ROOM_POOL), equalTo("POOL"))
+            .body("find { it.id == '%s' }.capacity".formatted(SeedData.ROOM_POOL), equalTo(SeedData.ROOM_POOL_CAPACITY))
+            .body("capacity", everyItem(greaterThan(0)));
+    }
 }
