@@ -1,5 +1,6 @@
 package br.ifsp.demo.ui.tests;
 
+import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.FakeData;
 import br.ifsp.demo.support.SeedData;
 import br.ifsp.demo.ui.UiTestBase;
@@ -49,5 +50,15 @@ class EditActivityUiTest extends UiTestBase {
         AdminActivitiesPage list = openSwimming().setMonthlyFee("215.50").submitAndReturnToList();
 
         assertThat(list.cell(SeedData.SWIMMING_NAME, 5)).isEqualTo("R$ 215,50");
+    }
+
+    @Test
+    @DisplayName("mostra o erro do back-end quando a capacidade é menor que os matriculados")
+    void shouldRejectCapacityBelowEnrolled() {
+        DbFixtures.fillActivity(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, 2);
+
+        ActivityFormPage form = openSwimming().setCapacity("1").submit();
+
+        assertThat(form.apiError()).isEqualTo("New capacity cannot be lower than enrolled students: 2");
     }
 }
