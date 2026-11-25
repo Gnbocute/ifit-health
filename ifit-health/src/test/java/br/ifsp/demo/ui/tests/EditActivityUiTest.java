@@ -1,5 +1,6 @@
 package br.ifsp.demo.ui.tests;
 
+import br.ifsp.demo.support.FakeData;
 import br.ifsp.demo.support.SeedData;
 import br.ifsp.demo.ui.UiTestBase;
 import br.ifsp.demo.ui.pages.ActivityFormPage;
@@ -29,5 +30,16 @@ class EditActivityUiTest extends UiTestBase {
         assertThat(form.startTime()).isEqualTo("11:30");
         assertThat(form.capacity()).isEqualTo("20");
         assertThat(form.monthlyFee()).isEqualTo("180");
+    }
+
+    @Test
+    @DisplayName("salva nova capacidade e mostra na lista")
+    void shouldEditCapacity() {
+        int capacity = FakeData.faker().number().numberBetween(1, 20);
+
+        AdminActivitiesPage list = openSwimming().setCapacity(String.valueOf(capacity)).submitAndReturnToList();
+
+        assertThat(list.toast()).isEqualTo("Atividade atualizada!");
+        assertThat(list.cell(SeedData.SWIMMING_NAME, 4)).isEqualTo("0/" + capacity);
     }
 }
