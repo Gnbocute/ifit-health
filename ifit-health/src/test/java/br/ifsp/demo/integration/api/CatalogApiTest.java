@@ -6,6 +6,8 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -63,5 +65,12 @@ class CatalogApiTest extends ApiTestBase {
         List<String> names = asAdmin().when().get("/sports").then().statusCode(200).extract().path("name");
 
         assertThat(names).isSortedAccordingTo(Collator.getInstance(Locale.forLanguageTag("pt-BR")));
+    }
+
+    @ParameterizedTest(name = "GET {0}")
+    @ValueSource(strings = {"/sports", "/rooms", "/trainers"})
+    @DisplayName("retorna 403 para aluno no catálogo")
+    void shouldForbidStudents(String path) {
+        as(newStudent()).when().get(path).then().statusCode(403);
     }
 }
