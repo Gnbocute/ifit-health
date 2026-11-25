@@ -9,7 +9,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
@@ -28,6 +31,11 @@ class ActivityReportApiTest extends ApiTestBase {
             request = request.queryParam(extraParams[i], extraParams[i + 1]);
         }
         return request.get("/activity-reports").then();
+    }
+
+    private UUID judoOnTuesday() {
+        return DbFixtures.insertActivity(SeedData.SPORT_JUDO, SeedData.ROOM_JUDO, SeedData.TRAINER_JOHN,
+                LocalTime.of(18, 0), LocalTime.of(19, 0), 10, new BigDecimal("100"), true, DayOfWeek.TUESDAY);
     }
 
     @Test
@@ -89,5 +97,20 @@ class ActivityReportApiTest extends ApiTestBase {
         report(LocalDate.of(2026, 1, 1), MARCH_31)
                 .statusCode(200)
                 .body(SWIMMING_ITEM + ".enrollmentCount", equalTo(1));
+    }
+
+    @Test
+    @DisplayName("retorna só as atividades da modalidade filtrada no relatório")
+    void shouldFilterBySport() {
+        UUID judo = judoOnTuesday();
+        DbFixtures.enrollNewCustomer(judo, new BigDecimal("100"), MARCH_1);
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, MARCH_1);
+
+        report(MARCH_1, MARCH_31, "sportId", SeedData.SPORT_JUDO.toString())
+                .statusCode(200)
+                .body("items.size()", equalTo(1))
+                .body("items[0].activityClassId", equalTo(judo.toString()))
+                .body("items[0].enrollmentCount", equalTo(1))
+                .body("items[0].revenue", isNumber(100));
     }
 }
