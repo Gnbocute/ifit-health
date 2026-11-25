@@ -116,4 +116,12 @@ class UserAndCustomerPersistenceTest extends PersistenceTestBase {
                 .extracting(Customer::getId).isEqualTo(SeedData.ANA_CUSTOMER_ID);
         assertThat(customerRepository.findByCpf(FakeData.cpf())).isEmpty();
     }
+
+    @Test
+    @DisplayName("encontra o cliente vinculado à conta")
+    void shouldFindByUserId() {
+        assertThat(customerRepository.findByUserId(SeedData.ANA_USER_ID)).get()
+                .extracting(Customer::getId).isEqualTo(SeedData.ANA_CUSTOMER_ID);
+        assertThat(customerRepository.findByUserId(UUID.randomUUID())).isEmpty();
+    }
 }
