@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.EnumSet;
 import java.util.UUID;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -286,5 +287,16 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
         assertThat(trainers).extracting(SqliteCatalogQueries.TrainerRow::name).isSorted();
         assertThat(trainers).filteredOn(t -> t.id().equals(SeedData.TRAINER_JOHN)).singleElement()
             .satisfies(t -> assertThat(t.active()).isFalse());
+    }
+
+    @Test
+    @DisplayName("ordena modalidades sem diferenciar maiúsculas")
+    void shouldOrderIgnoringCase() {
+        DbFixtures.update("INSERT INTO sports (id, name, room_type) VALUES (?, 'basquete', 'COURT')", UUID.randomUUID().toString());
+
+        List<String> names = catalogQueries.findSports().stream().map(SqliteCatalogQueries.SportRow::name).toList();
+
+        assertThat(names.indexOf("basquete")).isLessThan(names.indexOf("Futebol"));
+        assertThat(names.indexOf("Atletismo")).isLessThan(names.indexOf("basquete"));
     }
 }
