@@ -450,4 +450,11 @@ class ActivityClassApiTest extends ApiTestBase {
         as(newStudent()).body(validRequest()).when().put("/activity-classes/{id}", SeedData.SWIMMING_CLASS)
             .then().statusCode(403);
     }
+
+    @Test
+    @DisplayName("retorna 401 ao editar atividade sem token")
+    void shouldRequireTokenToEditActivity() {
+        anonymous().body(validRequest()).when().put("/activity-classes/{id}", SeedData.SWIMMING_CLASS)
+            .then().statusCode(401);
+    }
 }
