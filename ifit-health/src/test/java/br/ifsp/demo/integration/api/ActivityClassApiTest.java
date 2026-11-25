@@ -2,6 +2,7 @@ package br.ifsp.demo.integration.api;
 
 import br.ifsp.demo.support.ApiTestBase;
 import br.ifsp.demo.support.DbFixtures;
+import br.ifsp.demo.support.FakeData;
 import br.ifsp.demo.support.SeedData;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
@@ -381,5 +382,31 @@ class ActivityClassApiTest extends ApiTestBase {
 
         asAdmin().body(body).when().put("/activity-classes/{id}", SeedData.SWIMMING_CLASS).then().statusCode(409)
             .body("message", equalTo("New capacity cannot be lower than enrolled students: 2"));
+    }
+
+    @Test
+    @DisplayName("retorna 409 listando os alunos afetados por conflito de horário")
+    void shouldReturnAffectedStudentsOnConflict() {
+        UUID gymClass = DbFixtures.insertActivity(SeedData.SPORT_WEIGHT_TRAINING, SeedData.ROOM_GYM, SeedData.TRAINER_JOHN,
+                LocalTime.of(8, 0), LocalTime.of(9, 0), 10, new BigDecimal("120"), true, DayOfWeek.WEDNESDAY);
+        String studentName = FakeData.firstName() + " " + FakeData.lastName();
+        UUID customer = DbFixtures.insertCustomer(studentName, FakeData.cpf(), FakeData.email());
+        UUID enrollment = DbFixtures.insertEnrollment(customer, true);
+        DbFixtures.insertEnrollmentActivity(enrollment, SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, LocalDate.now(), null, true);
+        DbFixtures.insertEnrollmentActivity(enrollment, gymClass, new BigDecimal("120"), LocalDate.now(), null, true);
+
+        Map<String, Object> body = validRequest();
+        body.put("weekdays", List.of("MONDAY"));
+        body.put("startTime", "12:00");
+        body.put("endTime", "13:00");
+        body.put("capacity", 10);
+
+        asAdmin().body(body).when().put("/activity-classes/{id}", gymClass).then().statusCode(409).contentType(ContentType.JSON)
+            .body("message", equalTo("Student has a schedule conflict"))
+            .body("affectedStudents", hasSize(1))
+            .body("affectedStudents[0].customerId", equalTo(customer.toString()))
+            .body("affectedStudents[0].customerName", equalTo(studentName))
+            .body("affectedStudents[0].conflictingActivities[0].activityClassId", equalTo(SeedData.SWIMMING_CLASS.toString()))
+            .body("affectedStudents[0].conflictingActivities[0].sportName", equalTo(SeedData.SWIMMING_NAME));
     }
 }
