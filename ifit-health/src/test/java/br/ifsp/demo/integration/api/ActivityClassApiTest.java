@@ -434,4 +434,13 @@ class ActivityClassApiTest extends ApiTestBase {
         asAdmin().body(body).when().put("/activity-classes/{id}", SeedData.SWIMMING_CLASS).then().statusCode(400)
             .body("errors." + field, not(emptyOrNullString()));
     }
+
+    @Test
+    @DisplayName("retorna 404 ao editar atividade desconhecida")
+    void shouldReturnNotFoundWhenEditingUnknownActivity() {
+        UUID unknown = UUID.randomUUID();
+
+        asAdmin().body(validRequest()).when().put("/activity-classes/{id}", unknown).then().statusCode(404)
+            .body("message", equalTo("Activity class not found: " + unknown));
+    }
 }
