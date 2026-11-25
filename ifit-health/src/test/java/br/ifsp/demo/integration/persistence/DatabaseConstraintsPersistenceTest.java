@@ -154,4 +154,13 @@ class DatabaseConstraintsPersistenceTest extends PersistenceTestBase {
         assertRejected(sql, UUID.randomUUID().toString(), UUID.randomUUID().toString(), SeedData.SWIMMING_CLASS.toString())
                 .hasMessageContaining("FOREIGN KEY constraint failed");
     }
+
+    @Test
+    @DisplayName("exige nomes únicos de modalidades e salas")
+    void shouldRejectDuplicatedCatalogNames() {
+        assertRejected("INSERT INTO sports (id, name, room_type) VALUES (?, ?, 'POOL')", UUID.randomUUID().toString(), SeedData.SWIMMING_NAME)
+                .hasMessageContaining("UNIQUE constraint failed: sports.name");
+        assertRejected("INSERT INTO rooms (id, name, room_type, capacity) VALUES (?, 'Piscina', 'POOL', 10)", UUID.randomUUID().toString())
+                .hasMessageContaining("UNIQUE constraint failed: rooms.name");
+    }
 }
