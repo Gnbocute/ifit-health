@@ -2,6 +2,7 @@ package br.ifsp.demo.integration.persistence;
 
 import br.ifsp.demo.domain.model.ActivityClass;
 import br.ifsp.demo.domain.model.Schedule;
+import br.ifsp.demo.persistence.sqlite.SqliteActivityClassQueries.ActivityClassRow;
 import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.PersistenceTestBase;
 import br.ifsp.demo.support.SeedData;
@@ -33,6 +34,10 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
         activity.edit(activity.getRoom(), activity.getSport(), activity.getTrainer(), activity.getSchedule(),
                 activity.getCapacity(), new BigDecimal(fee));
         return activityClassRepository.save(activity);
+    }
+
+    private ActivityClassRow row(UUID id, boolean latestPrice) {
+        return activityQueries.findAll(null, latestPrice).stream().filter(r -> r.id().equals(id)).findFirst().orElseThrow();
     }
 
     @Test
@@ -165,5 +170,19 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
                 LocalTime.of(9, 0), LocalTime.of(10, 0), 10, new BigDecimal("90"), true, DayOfWeek.FRIDAY);
 
         assertThat(activityClassRepository.findLatestPrice(legacy, new BigDecimal("77"))).isEqualByComparingTo("77");
+    }
+
+    @Test
+    @DisplayName("faz COUNT de alunos distintos só com matrícula ativa")
+    void shouldCountOnlyActiveStudents() {
+        DbFixtures.fillActivity(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, 2);
+        UUID canceled = DbFixtures.insertEnrollment(DbFixtures.insertCustomer(), true);
+        DbFixtures.insertEnrollmentActivity(canceled, SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE,
+            LocalDate.now().minusMonths(2), LocalDate.now().minusMonths(1), false);
+        UUID inactiveEnrollment = DbFixtures.insertEnrollment(DbFixtures.insertCustomer(), false);
+        DbFixtures.insertEnrollmentActivity(inactiveEnrollment, SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE,
+            LocalDate.now(), null, true);
+
+        assertThat(row(SeedData.SWIMMING_CLASS, false).enrolledCount()).isEqualTo(2);
     }
 }
