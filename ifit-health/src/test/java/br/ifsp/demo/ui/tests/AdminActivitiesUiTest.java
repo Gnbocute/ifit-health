@@ -3,6 +3,7 @@ package br.ifsp.demo.ui.tests;
 import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.SeedData;
 import br.ifsp.demo.ui.UiTestBase;
+import br.ifsp.demo.ui.pages.ActivityFormPage;
 import br.ifsp.demo.ui.pages.AdminActivitiesPage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -46,5 +47,20 @@ class AdminActivitiesUiTest extends UiTestBase {
         assertThat(page.rowCount()).isEqualTo(2);
         assertThat(page.cell(SeedData.SWIMMING_NAME, 4)).isEqualTo("2/20");
         assertThat(page.cell("Judô", 6)).isEqualTo("Inativa");
+    }
+
+    @Test
+    @DisplayName("abre o formulário de nova atividade e o de edição")
+    void shouldNavigateToForms() {
+        loginAsAdmin();
+        AdminActivitiesPage page = new AdminActivitiesPage(driver).waitUntilLoaded();
+
+        ActivityFormPage newForm = page.clickNewActivity();
+        assertThat(newForm.pageTitle()).isEqualTo(ActivityFormPage.NEW_TITLE);
+        assertThat(newForm.currentPath()).isEqualTo("/admin/atividades/nova");
+
+        ActivityFormPage editForm = page.open().edit(SeedData.SWIMMING_NAME);
+        assertThat(editForm.pageTitle()).isEqualTo(ActivityFormPage.EDIT_TITLE);
+        assertThat(editForm.currentPath()).isEqualTo("/admin/atividades/" + SeedData.SWIMMING_CLASS);
     }
 }
