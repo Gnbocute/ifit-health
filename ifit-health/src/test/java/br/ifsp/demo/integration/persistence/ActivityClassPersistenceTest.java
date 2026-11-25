@@ -185,4 +185,16 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
 
         assertThat(row(SeedData.SWIMMING_CLASS, false).enrolledCount()).isEqualTo(2);
     }
+
+    @Test
+    @DisplayName("retorna zero alunos para atividade sem matrícula (LEFT JOIN)")
+    void shouldReturnZeroWithoutEnrollments() {
+        ActivityClassRow row = row(SeedData.SWIMMING_CLASS, false);
+
+        assertThat(row.enrolledCount()).isZero();
+        assertThat(row.sportName()).isEqualTo(SeedData.SWIMMING_NAME);
+        assertThat(row.roomName()).isEqualTo("Piscina");
+        assertThat(row.trainerName()).isEqualTo(SeedData.TRAINER_JULIANA_NAME);
+        assertThat(row.weekdays()).isEqualTo("MONDAY");
+    }
 }
