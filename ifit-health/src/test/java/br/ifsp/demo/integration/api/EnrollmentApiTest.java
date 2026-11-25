@@ -339,4 +339,10 @@ class EnrollmentApiTest extends ApiTestBase {
                 .then().statusCode(404)
                 .body("message", equalTo("Enrollment not found"));
     }
+
+    @Test
+    @DisplayName("retorna 403 para o administrador ao cancelar")
+    void shouldForbidAdminToCancel() {
+        asAdmin().when().delete("/me/enrollment/activities/{id}", UUID.randomUUID()).then().statusCode(403);
+    }
 }
