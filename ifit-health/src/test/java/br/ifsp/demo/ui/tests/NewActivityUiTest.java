@@ -62,4 +62,12 @@ class NewActivityUiTest extends UiTestBase {
 
         assertThat(form.formErrors()).containsExactly("O horário de término deve ser após o início.");
     }
+
+    @Test
+    @DisplayName("rejeita capacidade maior que a da sala no formulário")
+    void shouldRejectCapacityAboveRoom() {
+        form.fill("Musculação", "Sala de Musculação", "John Doe", List.of("Sexta"), "08:00", "09:00", "31", "100").submit();
+
+        assertThat(form.formErrors()).containsExactly("Capacidade excede o limite da sala (30).");
+    }
 }
