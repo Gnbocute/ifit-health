@@ -213,4 +213,16 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
         assertThat(activityQueries.findAll(false)).extracting(ActivityClassRow::id).containsExactly(inactive);
         assertThat(activityQueries.findAll(null)).hasSize(2);
     }
+
+    @Test
+    @DisplayName("ordena as atividades pelo nome da modalidade")
+    void shouldOrderBySportName() {
+        DbFixtures.insertActivity(SeedData.SPORT_ATHLETICS, SeedData.ROOM_TRACK, SeedData.TRAINER_CARLOS,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), 10, new BigDecimal("90"), true, DayOfWeek.FRIDAY);
+        DbFixtures.insertActivity(SeedData.SPORT_SOCCER, SeedData.ROOM_SOCCER_COURT, SeedData.TRAINER_MARIA,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), 10, new BigDecimal("90"), true, DayOfWeek.FRIDAY);
+
+        assertThat(activityQueries.findAll(null)).extracting(ActivityClassRow::sportName)
+                .containsExactly("Atletismo", "Futebol", SeedData.SWIMMING_NAME);
+    }
 }
