@@ -57,4 +57,12 @@ class DatabaseConstraintsPersistenceTest extends PersistenceTestBase {
 
         assertThat(DbFixtures.count("SELECT COUNT(*) FROM customers WHERE user_id IS NULL")).isEqualTo(2);
     }
+
+    @Test
+    @DisplayName("exige que user_id aponte para uma conta existente")
+    void shouldRejectCustomerWithUnknownUser() {
+        assertRejected("INSERT INTO customers (id, user_id, cpf, name, birthdate, gender, email) VALUES (?, ?, ?, 'X', '2000-01-01', 'MALE', ?)",
+                UUID.randomUUID().toString(), UUID.randomUUID().toString(), FakeData.cpf(), FakeData.email())
+                .hasMessageContaining("FOREIGN KEY constraint failed");
+    }
 }
