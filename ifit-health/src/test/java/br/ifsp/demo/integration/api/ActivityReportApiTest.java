@@ -150,4 +150,15 @@ class ActivityReportApiTest extends ApiTestBase {
                 .body("items.size()", equalTo(1))
                 .body(SWIMMING_ITEM + ".revenue", isNumber(180));
     }
+
+    @Test
+    @DisplayName("calcula a ocupação média quando há filtro no relatório")
+    void shouldCalculateOccupancyWithFilter() {
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, MARCH_1);
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, MARCH_1);
+
+        report(MARCH_1, MARCH_31, "dayOfWeek", "MONDAY")
+                .statusCode(200)
+                .body(SWIMMING_ITEM + ".averageOccupancyPercent", isNumber(10.0));
+    }
 }
