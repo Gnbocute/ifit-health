@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -340,5 +341,29 @@ class ActivityClassApiTest extends ApiTestBase {
         asAdmin().when().get("/activity-classes/{id}", SeedData.SWIMMING_CLASS).then()
             .body("capacity", equalTo(15))
             .body("startTime", equalTo("14:00:00"));
+    }
+
+    @Test
+    @DisplayName("agenda nova mensalidade para o mês seguinte sem mudar o valor atual dos alunos")
+    void shouldScheduleNewFeeForNextMonth() {
+        Map<String, Object> body = validRequest();
+        body.put("weekdays", List.of(SeedData.SWIMMING_DAY.name()));
+        body.put("startTime", SeedData.SWIMMING_START.toString());
+        body.put("endTime", SeedData.SWIMMING_END.toString());
+        body.put("capacity", SeedData.SWIMMING_CAPACITY);
+        body.put("monthlyFee", 210);
+
+        asAdmin().body(body).when().put("/activity-classes/{id}", SeedData.SWIMMING_CLASS)
+            .then().statusCode(200)
+            .body("monthlyFee", isNumber(210));
+
+        asAdmin().when().get("/activity-classes/{id}", SeedData.SWIMMING_CLASS).then()
+            .body("monthlyFee", isNumber(210));
+        as(newStudent()).when().get("/activity-classes/{id}", SeedData.SWIMMING_CLASS).then()
+            .body("monthlyFee", isNumber(180));
+
+        String validFrom = DbFixtures.text("SELECT valid_from FROM activity_prices WHERE activity_id = ? AND monthly_fee = 210",
+                SeedData.SWIMMING_CLASS.toString());
+        assertThat(validFrom).isEqualTo(LocalDate.now().withDayOfMonth(1).plusMonths(1).toString());
     }
 }
