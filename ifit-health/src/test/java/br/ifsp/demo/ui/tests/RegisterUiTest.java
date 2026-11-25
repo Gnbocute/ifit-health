@@ -103,4 +103,14 @@ class RegisterUiTest extends UiTestBase {
         assertThat(register.formErrors()).containsExactly("Este e-mail já está cadastrado.");
         assertThat(register.currentPath()).isEqualTo("/cadastro");
     }
+
+    @Test
+    @DisplayName("formata CPF e CEP enquanto digita")
+    void shouldMaskCpfAndCep() {
+        RegisterPage register = new RegisterPage(driver).open().fillCpf("52998224725").enableAddress()
+                .fillAddress("13560001", "1", "Rua", "Cidade", "SP");
+
+        assertThat(register.cpfValue()).isEqualTo("529.982.247-25");
+        assertThat(register.cepValue()).isEqualTo("13560-001");
+    }
 }
