@@ -1,5 +1,6 @@
 package br.ifsp.demo.integration.persistence;
 
+import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.FakeData;
 import br.ifsp.demo.support.PersistenceTestBase;
 import br.ifsp.demo.support.SeedData;
@@ -8,6 +9,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("PersistenceTest")
 @Tag("IntegrationTest")
@@ -44,5 +47,14 @@ class DatabaseConstraintsPersistenceTest extends PersistenceTestBase {
         assertRejected("INSERT INTO customers (id, user_id, cpf, name, birthdate, gender, email) VALUES (?, ?, ?, 'X', '2000-01-01', 'MALE', ?)",
                 UUID.randomUUID().toString(), SeedData.ANA_USER_ID.toString(), FakeData.cpf(), FakeData.email())
                 .hasMessageContaining("UNIQUE constraint failed: customers.user_id");
+    }
+
+    @Test
+    @DisplayName("permite vários clientes sem conta (índice único parcial)")
+    void shouldAllowSeveralCustomersWithoutAccount() {
+        DbFixtures.insertCustomer();
+        DbFixtures.insertCustomer();
+
+        assertThat(DbFixtures.count("SELECT COUNT(*) FROM customers WHERE user_id IS NULL")).isEqualTo(2);
     }
 }
