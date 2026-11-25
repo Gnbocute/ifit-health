@@ -104,4 +104,16 @@ class DatabaseConstraintsPersistenceTest extends PersistenceTestBase {
                 SeedData.TRAINER_JOHN.toString(), capacity, "10")
                 .hasMessageContaining("CHECK constraint failed");
     }
+
+    @Test
+    @DisplayName("proíbe mensalidade negativa e aceita mensalidade zero")
+    void shouldValidateMonthlyFee() {
+        assertRejected(INSERT_ACTIVITY, UUID.randomUUID().toString(), SeedData.SPORT_JUDO.toString(), SeedData.ROOM_JUDO.toString(),
+                SeedData.TRAINER_JOHN.toString(), 10, "-0.01")
+                .hasMessageContaining("CHECK constraint failed");
+
+        DbFixtures.update(INSERT_ACTIVITY, UUID.randomUUID().toString(), SeedData.SPORT_JUDO.toString(), SeedData.ROOM_JUDO.toString(),
+                SeedData.TRAINER_JOHN.toString(), 10, "0");
+        assertThat(DbFixtures.count("SELECT COUNT(*) FROM activity_class WHERE monthly_fee = 0")).isEqualTo(1);
+    }
 }
