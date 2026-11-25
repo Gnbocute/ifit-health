@@ -76,4 +76,17 @@ class DatabaseConstraintsPersistenceTest extends PersistenceTestBase {
                 UUID.randomUUID().toString(), customer.toString())
                 .hasMessageContaining("UNIQUE constraint failed: enrollments.customer_id");
     }
+
+    @Test
+    @DisplayName("aceita só ACTIVE e INACTIVE como status da matrícula, com ACTIVE por padrão")
+    void shouldValidateEnrollmentStatus() {
+        UUID customer = DbFixtures.insertCustomer();
+        assertRejected("INSERT INTO enrollments (id, customer_id, enroll_date, status) VALUES (?, ?, '2026-01-01', 'PAUSED')",
+                UUID.randomUUID().toString(), customer.toString())
+                .hasMessageContaining("CHECK constraint failed");
+
+        String id = UUID.randomUUID().toString();
+        DbFixtures.update("INSERT INTO enrollments (id, customer_id, enroll_date) VALUES (?, ?, '2026-01-01')", id, customer.toString());
+        assertThat(DbFixtures.text("SELECT status FROM enrollments WHERE id = ?", id)).isEqualTo("ACTIVE");
+    }
 }
