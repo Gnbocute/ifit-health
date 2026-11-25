@@ -38,4 +38,20 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
         assertThat(DbFixtures.text("SELECT valid_from FROM activity_prices WHERE activity_id = ?", activity.getId().toString()))
                 .isEqualTo(LocalDate.now().toString());
     }
+
+    @Test
+    @DisplayName("reconstrói a atividade com sala, modalidade, professor e horário")
+    void shouldFindActivityById() {
+        ActivityClass activity = activity(SeedData.SWIMMING_CLASS);
+
+        assertThat(activity.getSport().getName()).isEqualTo(SeedData.SWIMMING_NAME);
+        assertThat(activity.getRoom().getId()).isEqualTo(SeedData.ROOM_POOL);
+        assertThat(activity.getTrainer().getName()).isEqualTo(SeedData.TRAINER_JULIANA_NAME);
+        assertThat(activity.getSchedule().getWeekdays()).containsExactly(SeedData.SWIMMING_DAY);
+        assertThat(activity.getSchedule().getStartTime()).isEqualTo(SeedData.SWIMMING_START);
+        assertThat(activity.getSchedule().getEndTime()).isEqualTo(SeedData.SWIMMING_END);
+        assertThat(activity.getCapacity()).isEqualTo(SeedData.SWIMMING_CAPACITY);
+        assertThat(activity.getMonthlyFee()).isEqualByComparingTo(SeedData.SWIMMING_FEE);
+        assertThat(activity.isActive()).isTrue();
+    }
 }
