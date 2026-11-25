@@ -87,4 +87,16 @@ class NewActivityUiTest extends UiTestBase {
         assertThat(form.apiError()).isEqualTo("Room is already booked for the given schedule");
         assertThat(DbFixtures.count("SELECT COUNT(*) FROM activity_class")).isEqualTo(1);
     }
+
+    @Test
+    @DisplayName("valida no formulário, em português, o horário de funcionamento (06:00-22:00)")
+    void shouldValidateOpeningHours() {
+        form.fill("Musculação", "Sala de Musculação", "John Doe", List.of("Sexta"), "05:00", "06:00", "10", "100")
+            .submit()
+            .waitForFeedback();
+
+        assertThat(form.hasFormErrors())
+            .as("validação local esperada, mas o formulário só mostrou a mensagem do back-end: %s",
+                form.hasFormErrors() ? "" : form.apiError()).isTrue();
+    }
 }
