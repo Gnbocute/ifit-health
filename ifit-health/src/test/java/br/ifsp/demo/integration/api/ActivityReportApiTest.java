@@ -126,4 +126,14 @@ class ActivityReportApiTest extends ApiTestBase {
                 .body("items.size()", equalTo(1))
                 .body("items[0].activityClassId", equalTo(SeedData.SWIMMING_CLASS.toString()));
     }
+
+    @Test
+    @DisplayName("retorna lista vazia quando modalidade e dia da semana não combinam")
+    void shouldReturnEmptyWhenSportAndWeekdayDoNotMatch() {
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, MARCH_1);
+
+        report(MARCH_1, MARCH_31, "sportId", SeedData.SPORT_SWIMMING.toString(), "dayOfWeek", "FRIDAY")
+                .statusCode(200)
+                .body("items", empty());
+    }
 }
