@@ -102,4 +102,10 @@ class UserAndCustomerPersistenceTest extends PersistenceTestBase {
         assertThat(customer(SeedData.ANA_CUSTOMER_ID).getName()).isEqualTo("Ana Souza Lima");
         assertThat(DbFixtures.count("SELECT COUNT(*) FROM customers")).isEqualTo(2);
     }
+
+    @Test
+    @DisplayName("retorna vazio ao buscar cliente com id desconhecido")
+    void shouldReturnEmptyForUnknownId() {
+        assertThat(customerRepository.findById(UUID.randomUUID())).isEmpty();
+    }
 }
