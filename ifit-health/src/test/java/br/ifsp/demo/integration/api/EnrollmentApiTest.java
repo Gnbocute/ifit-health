@@ -345,4 +345,10 @@ class EnrollmentApiTest extends ApiTestBase {
     void shouldForbidAdminToCancel() {
         asAdmin().when().delete("/me/enrollment/activities/{id}", UUID.randomUUID()).then().statusCode(403);
     }
+
+    @Test
+    @DisplayName("retorna 401 ao cancelar sem token")
+    void shouldRequireTokenToCancel() {
+        anonymous().when().delete("/me/enrollment/activities/{id}", UUID.randomUUID()).then().statusCode(401);
+    }
 }
