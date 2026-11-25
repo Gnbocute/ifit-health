@@ -12,6 +12,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.UUID;
+
 @Tag("UiTest")
 @DisplayName("UI - Tela de edição de atividade")
 class EditActivityUiTest extends UiTestBase {
@@ -60,5 +66,24 @@ class EditActivityUiTest extends UiTestBase {
         ActivityFormPage form = openSwimming().setCapacity("1").submit();
 
         assertThat(form.apiError()).isEqualTo("New capacity cannot be lower than enrolled students: 2");
+    }
+
+    @Test
+    @DisplayName("lista os alunos afetados quando o novo horário gera conflito")
+    void shouldShowAffectedStudents() {
+        UUID gym = DbFixtures.insertActivity(SeedData.SPORT_WEIGHT_TRAINING, SeedData.ROOM_GYM, SeedData.TRAINER_JOHN,
+            LocalTime.of(8, 0), LocalTime.of(9, 0), 10, new BigDecimal("120"), true, DayOfWeek.WEDNESDAY);
+        String student = FakeData.firstName() + " " + FakeData.lastName();
+        UUID enrollment = DbFixtures.insertEnrollment(DbFixtures.insertCustomer(student, FakeData.cpf(), FakeData.email()), true);
+        DbFixtures.insertEnrollmentActivity(enrollment, SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, LocalDate.now(), null, true);
+        DbFixtures.insertEnrollmentActivity(enrollment, gym, new BigDecimal("120"), LocalDate.now(), null, true);
+        loginAsAdmin();
+
+        ActivityFormPage form = new ActivityFormPage(driver).openEdit(gym.toString())
+            .toggleWeekday("Quarta").toggleWeekday("Segunda").setStart("12:00").setEnd("13:00").submit();
+
+        assertThat(form.apiError()).isEqualTo("Student has a schedule conflict");
+        assertThat(form.affectedStudents()).singleElement().asString()
+            .contains(student).contains(SeedData.SWIMMING_NAME).contains("11:30–12:30");
     }
 }
