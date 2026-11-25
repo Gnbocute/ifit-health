@@ -77,4 +77,16 @@ class AdminActivitiesUiTest extends UiTestBase {
         assertThat(reports.pageTitle()).isEqualTo(ReportsPage.TITLE);
         assertThat(reports.heading()).isEqualToIgnoringCase("Relatórios");
     }
+
+    @Test
+    @DisplayName("mantém a lista de atividades sem rolagem horizontal no celular")
+    void shouldBeResponsive() {
+        loginAsAdmin();
+        useMobileScreen();
+
+        AdminActivitiesPage page = new AdminActivitiesPage(driver).open();
+
+        assertThat(page.sports()).containsExactly(SeedData.SWIMMING_NAME);
+        assertThat(page.hasHorizontalScroll()).isFalse();
+    }
 }
