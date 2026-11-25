@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -98,5 +99,18 @@ class MyActivitiesUiTest extends UiTestBase {
         StudentActivitiesPage available = new StudentActivitiesPage(driver).waitUntilLoaded();
 
         assertThat(available.badge(SWIMMING)).isEqualTo("20 vagas");
+    }
+
+    @Test
+    @DisplayName("sugere a data local de hoje ao cancelar à noite")
+    void shouldSuggestLocalDate() {
+        StudentAccount student = registerStudent();
+        enrollViaApi(student, SeedData.SWIMMING_CLASS);
+        simulateBrowserClock(Instant.parse("2026-11-26T01:30:00Z"), "America/Sao_Paulo");
+        loginPage().loginAs(student.email(), student.password()).waitForPath("/aluno/atividades");
+
+        MyActivitiesPage page = new MyActivitiesPage(driver).open().openCancel(SWIMMING);
+
+        assertThat(page.endDate()).isEqualTo("2026-11-25");
     }
 }
