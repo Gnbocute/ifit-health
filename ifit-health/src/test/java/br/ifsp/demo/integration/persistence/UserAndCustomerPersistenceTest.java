@@ -1,5 +1,8 @@
 package br.ifsp.demo.integration.persistence;
 
+import br.ifsp.demo.domain.model.Address;
+import br.ifsp.demo.domain.model.Customer;
+import br.ifsp.demo.domain.model.enums.Gender;
 import br.ifsp.demo.security.user.JpaUserRepository;
 import br.ifsp.demo.security.user.Role;
 import br.ifsp.demo.security.user.User;
@@ -28,6 +31,12 @@ class UserAndCustomerPersistenceTest extends PersistenceTestBase {
     private User newUser(String email) {
         return User.builder().id(UUID.randomUUID()).name(FakeData.firstName()).lastname(FakeData.lastName())
                 .email(email).password("hash").role(Role.USER).build();
+    }
+
+    private Customer newCustomer(UUID userId) {
+        Address address = new Address("13560-000", "10", FakeData.faker().address().streetName(), "São Carlos", "SP");
+        return new Customer(userId, FakeData.cpf(), FakeData.firstName() + " " + FakeData.lastName(),
+                FakeData.birthdate(), Gender.FEMALE, FakeData.phone(), FakeData.email(), address);
     }
 
     @Test
@@ -62,5 +71,22 @@ class UserAndCustomerPersistenceTest extends PersistenceTestBase {
     void shouldRejectDuplicatedEmail() {
         assertThatThrownBy(() -> userRepository.saveAndFlush(newUser(SeedData.ADMIN_EMAIL.toUpperCase())))
                 .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    @DisplayName("mantém todos os campos do cliente, inclusive o endereço")
+    void shouldSaveAndFindCustomer() {
+        Customer customer = newCustomer(null);
+
+        customerRepository.save(customer);
+        Customer found = customer(customer.getId());
+
+        assertThat(found.getCpf()).isEqualTo(customer.getCpf());
+        assertThat(found.getName()).isEqualTo(customer.getName());
+        assertThat(found.getEmail()).isEqualTo(customer.getEmail());
+        assertThat(found.getBirthdate()).isEqualTo(customer.getBirthdate());
+        assertThat(found.getGender()).isEqualTo(Gender.FEMALE);
+        assertThat(found.getAddress().getCity()).isEqualTo("São Carlos");
+        assertThat(found.getUserId()).isNull();
     }
 }
