@@ -86,4 +86,15 @@ class EditActivityUiTest extends UiTestBase {
         assertThat(form.affectedStudents()).singleElement().asString()
             .contains(student).contains(SeedData.SWIMMING_NAME).contains("11:30–12:30");
     }
+
+    @Test
+    @DisplayName("mostra erro ao editar atividade que não existe")
+    void shouldShowErrorForUnknownActivity() {
+        loginAsAdmin();
+        UUID unknown = UUID.randomUUID();
+
+        ActivityFormPage page = new ActivityFormPage(driver).visitEdit(unknown.toString());
+
+        assertThat(page.errorBox()).isEqualTo("Activity class not found: " + unknown);
+    }
 }
