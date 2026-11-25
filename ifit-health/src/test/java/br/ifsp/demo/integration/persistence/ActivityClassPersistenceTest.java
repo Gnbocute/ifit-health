@@ -137,4 +137,13 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
                 .containsExactly(180, 220);
         assertThat(activityClassRepository.findLatestPrice(SeedData.SWIMMING_CLASS, BigDecimal.ONE)).isEqualByComparingTo("220");
     }
+
+    @Test
+    @DisplayName("não cria histórico de preço ao salvar com a mesma mensalidade")
+    void shouldNotCreateHistoryWhenFeeDoesNotChange() {
+        changeFee(activity(SeedData.SWIMMING_CLASS), "180");
+
+        assertThat(DbFixtures.count("SELECT COUNT(*) FROM activity_prices WHERE activity_id = ?",
+                SeedData.SWIMMING_CLASS.toString())).isEqualTo(1);
+    }
 }
