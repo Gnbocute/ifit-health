@@ -1,5 +1,6 @@
 package br.ifsp.demo.integration.persistence;
 
+import br.ifsp.demo.support.FakeData;
 import br.ifsp.demo.support.PersistenceTestBase;
 import br.ifsp.demo.support.SeedData;
 import org.junit.jupiter.api.DisplayName;
@@ -20,5 +21,12 @@ class DatabaseConstraintsPersistenceTest extends PersistenceTestBase {
     void shouldRejectDuplicatedUserEmailIgnoringCase() {
         assertRejected(INSERT_USER, UUID.randomUUID().toString(), SeedData.ADMIN_EMAIL.toUpperCase(), "USER")
                 .hasMessageContaining("UNIQUE constraint failed: app_user.email");
+    }
+
+    @Test
+    @DisplayName("aceita só USER e ADMIN como papel em app_user")
+    void shouldRejectUnknownRole() {
+        assertRejected(INSERT_USER, UUID.randomUUID().toString(), FakeData.email(), "MANAGER")
+                .hasMessageContaining("CHECK constraint failed");
     }
 }
