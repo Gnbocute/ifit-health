@@ -113,4 +113,14 @@ class MyActivitiesUiTest extends UiTestBase {
 
         assertThat(page.endDate()).isEqualTo("2026-11-25");
     }
+
+    @Test
+    @DisplayName("mantém Minhas atividades sem rolagem horizontal no celular")
+    void shouldBeResponsive() {
+        MyActivitiesPage page = openEnrolledInSwimming();
+        useMobileScreen();
+
+        assertThat(page.hasHorizontalScroll()).isFalse();
+        assertThat(page.openCancel(SWIMMING).cancelDialogText()).containsIgnoringCase("Cancelar matrícula");
+    }
 }
