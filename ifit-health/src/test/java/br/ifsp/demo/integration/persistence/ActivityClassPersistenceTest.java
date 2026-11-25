@@ -94,4 +94,30 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
         assertThat(activityClassRepository.findSportById(UUID.randomUUID())).isNull();
         assertThat(activityClassRepository.findTrainerById(UUID.randomUUID())).isNull();
     }
+
+    @Test
+    @DisplayName("agenda nova mensalidade para o mês seguinte e mantém a vigente")
+    void shouldScheduleNewFeeForNextMonth() {
+        ActivityClass existing = activity(SeedData.SWIMMING_CLASS);
+        existing.edit(
+            existing.getRoom(),
+            existing.getSport(),
+            existing.getTrainer(),
+            existing.getSchedule(),
+            existing.getCapacity(),
+            new BigDecimal("200")
+        );
+
+        ActivityClass saved = activityClassRepository.save(existing);
+        LocalDate nextMonth = LocalDate.now().withDayOfMonth(1).plusMonths(1);
+
+        assertThat(saved.getMonthlyFee()).isEqualByComparingTo("180");
+        assertThat(activity(SeedData.SWIMMING_CLASS).getMonthlyFee()).isEqualByComparingTo("180");
+        assertThat(activityClassRepository.findPriceHistory(SeedData.SWIMMING_CLASS)).extracting(BigDecimal::intValue).containsExactly(180, 200);
+        assertThat(DbFixtures.text(
+            "SELECT valid_from FROM activity_prices WHERE activity_id = ? AND monthly_fee = ?",
+            SeedData.SWIMMING_CLASS.toString(),
+            new BigDecimal("200")
+        )).isEqualTo(nextMonth.toString());
+    }
 }
