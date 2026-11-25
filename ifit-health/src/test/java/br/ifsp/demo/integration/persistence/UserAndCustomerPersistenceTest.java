@@ -143,4 +143,15 @@ class UserAndCustomerPersistenceTest extends PersistenceTestBase {
         assertThat(customerRepository.attachUserToExistingCustomer(customerId, other.getId())).isFalse();
         assertThat(customer(customerId).getUserId()).isEqualTo(user.getId());
     }
+
+    @Test
+    @DisplayName("falha ao gravar cliente com CPF que já existe")
+    void shouldRejectDuplicatedCpf() {
+        Customer duplicated = newCustomer(null);
+        Customer copy = new Customer(null, SeedData.ANA_CPF, duplicated.getName(), duplicated.getBirthdate(),
+                duplicated.getGender(), null, FakeData.email(), null);
+
+        assertThatThrownBy(() -> customerRepository.save(copy)).isInstanceOf(RuntimeException.class);
+        assertThat(DbFixtures.count("SELECT COUNT(*) FROM customers")).isEqualTo(2);
+    }
 }
