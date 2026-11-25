@@ -11,7 +11,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -170,5 +172,18 @@ class DatabaseConstraintsPersistenceTest extends PersistenceTestBase {
         assertRejected("INSERT INTO rooms (id, name, room_type, capacity) VALUES (?, ?, 'GYM', 0)",
                 UUID.randomUUID().toString(), FakeData.faker().lorem().word() + UUID.randomUUID())
                 .hasMessageContaining("CHECK constraint failed");
+    }
+
+    @Test
+    @DisplayName("bloqueia no banco matrícula ativa além da capacidade (trigger de overbooking)")
+    void shouldBlockOverbookingInTheDatabase() {
+        UUID activity = DbFixtures.insertActivity(SeedData.SPORT_JUDO, SeedData.ROOM_JUDO, SeedData.TRAINER_JOHN,
+                LocalTime.of(7, 0), LocalTime.of(8, 0), 1, new BigDecimal("50"), true, DayOfWeek.SATURDAY);
+        DbFixtures.fillActivity(activity, new BigDecimal("50"), 1);
+        UUID enrollment = DbFixtures.insertEnrollment(DbFixtures.insertCustomer(), true);
+
+        assertRejected("INSERT INTO enrollment_activities (id, enrollment_id, activity_id, monthly_fee, start_date) VALUES (?, ?, ?, 50, '2026-01-01')",
+                UUID.randomUUID().toString(), enrollment.toString(), activity.toString())
+                .hasMessageContaining("ACTIVITY_CAPACITY_REACHED");
     }
 }
