@@ -191,4 +191,10 @@ class ActivityReportApiTest extends ApiTestBase {
     void shouldRejectMissingStartDate() {
         asAdmin().queryParam("endDate", MARCH_31.toString()).when().get("/activity-reports").then().statusCode(400);
     }
+
+    @Test
+    @DisplayName("retorna 400 para dia da semana inválido no relatório")
+    void shouldRejectInvalidWeekday() {
+        report(MARCH_1, MARCH_31, "dayOfWeek", "SEGUNDA").statusCode(400);
+    }
 }
