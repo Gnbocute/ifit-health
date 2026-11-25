@@ -331,4 +331,12 @@ class EnrollmentApiTest extends ApiTestBase {
         as(intruder).when().delete("/me/enrollment/activities/{id}", othersActivity).then().statusCode(404);
         assertThat(DbFixtures.text("SELECT status FROM enrollment_activities WHERE id = ?", othersActivity)).isEqualTo("ACTIVE");
     }
+
+    @Test
+    @DisplayName("retorna 404 ao cancelar quando o aluno não tem matrícula")
+    void shouldRejectWithoutEnrollment() {
+        as(newStudent()).when().delete("/me/enrollment/activities/{id}", UUID.randomUUID())
+                .then().statusCode(404)
+                .body("message", equalTo("Enrollment not found"));
+    }
 }
