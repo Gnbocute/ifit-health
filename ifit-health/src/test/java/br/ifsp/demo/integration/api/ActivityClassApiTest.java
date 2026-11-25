@@ -320,4 +320,25 @@ class ActivityClassApiTest extends ApiTestBase {
     void shouldRequireTokenToCreateActivity() {
         anonymous().body(validRequest()).when().post("/activity-classes").then().statusCode(401);
     }
+
+    @Test
+    @DisplayName("retorna 200 com o novo horário e a nova capacidade ao editar")
+    void shouldEditActivity() {
+        Map<String, Object> body = validRequest();
+        body.put("weekdays", List.of(DayOfWeek.MONDAY.name(), DayOfWeek.WEDNESDAY.name()));
+        body.put("startTime", "14:00:00");
+        body.put("endTime", "15:30:00");
+        body.put("capacity", 15);
+
+        asAdmin().body(body).when().put("/activity-classes/{id}", SeedData.SWIMMING_CLASS).then().statusCode(200)
+            .body("id", equalTo(SeedData.SWIMMING_CLASS.toString()))
+            .body("weekdays", containsInAnyOrder("MONDAY", "WEDNESDAY"))
+            .body("startTime", equalTo("14:00:00"))
+            .body("endTime", equalTo("15:30:00"))
+            .body("capacity", equalTo(15));
+
+        asAdmin().when().get("/activity-classes/{id}", SeedData.SWIMMING_CLASS).then()
+            .body("capacity", equalTo(15))
+            .body("startTime", equalTo("14:00:00"));
+    }
 }
