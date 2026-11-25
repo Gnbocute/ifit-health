@@ -65,4 +65,15 @@ class DatabaseConstraintsPersistenceTest extends PersistenceTestBase {
                 UUID.randomUUID().toString(), UUID.randomUUID().toString(), FakeData.cpf(), FakeData.email())
                 .hasMessageContaining("FOREIGN KEY constraint failed");
     }
+
+    @Test
+    @DisplayName("permite no máximo uma matrícula por cliente")
+    void shouldRejectSecondEnrollmentForCustomer() {
+        UUID customer = DbFixtures.insertCustomer();
+        DbFixtures.insertEnrollment(customer, true);
+
+        assertRejected("INSERT INTO enrollments (id, customer_id, enroll_date) VALUES (?, ?, '2026-01-01')",
+                UUID.randomUUID().toString(), customer.toString())
+                .hasMessageContaining("UNIQUE constraint failed: enrollments.customer_id");
+    }
 }
