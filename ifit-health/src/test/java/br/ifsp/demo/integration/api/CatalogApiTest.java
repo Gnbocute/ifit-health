@@ -34,4 +34,13 @@ class CatalogApiTest extends ApiTestBase {
             .body("find { it.id == '%s' }.capacity".formatted(SeedData.ROOM_POOL), equalTo(SeedData.ROOM_POOL_CAPACITY))
             .body("capacity", everyItem(greaterThan(0)));
     }
+
+    @Test
+    @DisplayName("retorna todos os professores e o status de cada um")
+    void shouldListTrainers() {
+        asAdmin().when().get("/trainers").then().statusCode(200)
+            .body("size()", equalTo(SeedData.TRAINERS_COUNT))
+            .body("find { it.id == '%s' }.name".formatted(SeedData.TRAINER_JULIANA), equalTo(SeedData.TRAINER_JULIANA_NAME))
+            .body("active", everyItem(is(true)));
+    }
 }
