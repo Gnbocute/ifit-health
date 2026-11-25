@@ -73,4 +73,11 @@ class CatalogApiTest extends ApiTestBase {
     void shouldForbidStudents(String path) {
         as(newStudent()).when().get(path).then().statusCode(403);
     }
+
+    @ParameterizedTest(name = "GET {0}")
+    @ValueSource(strings = {"/sports", "/rooms", "/trainers"})
+    @DisplayName("retorna 401 no catálogo sem token")
+    void shouldRequireAuthentication(String path) {
+        anonymous().when().get(path).then().statusCode(401);
+    }
 }
