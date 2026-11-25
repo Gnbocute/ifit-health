@@ -1,5 +1,6 @@
 package br.ifsp.demo.ui.tests;
 
+import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.SeedData;
 import br.ifsp.demo.ui.UiTestBase;
 import br.ifsp.demo.ui.pages.MyActivitiesPage;
@@ -49,5 +50,21 @@ class MyActivitiesUiTest extends UiTestBase {
                 .contains("Seg 11:30–12:30")
                 .contains("Início: " + LocalDate.now().format(BR))
                 .contains("R$ 180,00");
+    }
+
+    @Test
+    @DisplayName("cancela a atividade e move para o histórico")
+    void shouldCancelActivity() {
+        LocalDate endDate = LocalDate.now().plusDays(7);
+        MyActivitiesPage page = openEnrolledInSwimming().openCancel(SWIMMING);
+        assertThat(page.cancelDialogText()).contains("Apenas a atividade Natação será encerrada");
+
+        page.setEndDate(endDate).confirmCancel().waitDialogClosed();
+
+        assertThat(page.toast()).isEqualTo("Matrícula encerrada.");
+        assertThat(page.tab(0)).isEqualTo("Ativas (0)");
+        assertThat(page.tab(1)).isEqualTo("Histórico (1)");
+        assertThat(page.showHistory().cardText(SWIMMING)).contains("Encerrada em: " + endDate.format(BR));
+        assertThat(DbFixtures.text("SELECT status FROM enrollment_activities")).isEqualTo("INACTIVE");
     }
 }
