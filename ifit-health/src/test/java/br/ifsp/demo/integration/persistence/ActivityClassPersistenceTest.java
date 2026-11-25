@@ -28,6 +28,8 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
     @Autowired
     private SqliteActivityClassQueries activityQueries;
 
+    private static final LocalDate NEXT_MONTH = LocalDate.now().withDayOfMonth(1).plusMonths(1);
+
     private ActivityClass newGymClass(int capacity, String fee) {
         Schedule schedule = new Schedule(EnumSet.of(DayOfWeek.TUESDAY, DayOfWeek.THURSDAY), LocalTime.of(8, 0), LocalTime.of(9, 0));
         return new ActivityClass(activityClassRepository.findRoomById(SeedData.ROOM_GYM),
@@ -224,5 +226,15 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
 
         assertThat(activityQueries.findAll(null)).extracting(ActivityClassRow::sportName)
                 .containsExactly("Atletismo", "Futebol", SeedData.SWIMMING_NAME);
+    }
+
+    @Test
+    @DisplayName("mostra a mensalidade vigente ao aluno e a agendada ao admin")
+    void shouldChooseFeeByProfile() {
+        DbFixtures.insertPrice(SeedData.SWIMMING_CLASS, new BigDecimal("250"), NEXT_MONTH);
+
+        assertThat(row(SeedData.SWIMMING_CLASS, false).monthlyFee()).isEqualByComparingTo("180");
+        assertThat(row(SeedData.SWIMMING_CLASS, true).monthlyFee()).isEqualByComparingTo("250");
+        assertThat(activityQueries.findLatestPrice(SeedData.SWIMMING_CLASS, BigDecimal.ZERO)).isEqualByComparingTo("250");
     }
 }
