@@ -3,6 +3,7 @@ package br.ifsp.demo.integration.persistence;
 import br.ifsp.demo.security.user.JpaUserRepository;
 import br.ifsp.demo.security.user.Role;
 import br.ifsp.demo.security.user.User;
+import br.ifsp.demo.support.FakeData;
 import br.ifsp.demo.support.PersistenceTestBase;
 import br.ifsp.demo.support.SeedData;
 import org.junit.jupiter.api.DisplayName;
@@ -26,5 +27,12 @@ class UserAndCustomerPersistenceTest extends PersistenceTestBase {
                 .get()
                 .extracting(User::getId, User::getRole)
                 .containsExactly(SeedData.ADMIN_USER_ID, Role.ADMIN);
+    }
+
+    @Test
+    @DisplayName("existsByEmailIgnoreCase responde true só para e-mails existentes")
+    void shouldCheckIfEmailExists() {
+        assertThat(userRepository.existsByEmailIgnoreCase(SeedData.ANA_EMAIL.toUpperCase())).isTrue();
+        assertThat(userRepository.existsByEmailIgnoreCase(FakeData.email())).isFalse();
     }
 }
