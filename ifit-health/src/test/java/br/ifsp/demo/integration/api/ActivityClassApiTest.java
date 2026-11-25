@@ -366,4 +366,20 @@ class ActivityClassApiTest extends ApiTestBase {
                 SeedData.SWIMMING_CLASS.toString());
         assertThat(validFrom).isEqualTo(LocalDate.now().withDayOfMonth(1).plusMonths(1).toString());
     }
+
+    @Test
+    @DisplayName("retorna 409 quando a nova capacidade é menor que os matriculados")
+    void shouldRejectCapacityBelowEnrolledStudents() {
+        DbFixtures.fillActivity(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, 2);
+
+        Map<String, Object> body = validRequest();
+        body.put("weekdays", List.of(SeedData.SWIMMING_DAY.name()));
+        body.put("startTime", SeedData.SWIMMING_START.toString());
+        body.put("endTime", SeedData.SWIMMING_END.toString());
+        body.put("capacity", 1);
+        body.put("monthlyFee", SeedData.SWIMMING_FEE);
+
+        asAdmin().body(body).when().put("/activity-classes/{id}", SeedData.SWIMMING_CLASS).then().statusCode(409)
+            .body("message", equalTo("New capacity cannot be lower than enrolled students: 2"));
+    }
 }
