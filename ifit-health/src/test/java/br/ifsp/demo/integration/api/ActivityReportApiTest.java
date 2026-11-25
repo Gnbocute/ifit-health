@@ -136,4 +136,18 @@ class ActivityReportApiTest extends ApiTestBase {
                 .statusCode(200)
                 .body("items", empty());
     }
+
+    @Test
+    @DisplayName("mantém os mesmos valores com e sem filtro para matrícula anterior ao período")
+    void shouldKeepValuesConsistentWhenFilteringBySport() {
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, LocalDate.of(2026, 2, 10));
+
+        report(MARCH_1, MARCH_31).statusCode(200)
+                .body(SWIMMING_ITEM + ".revenue", isNumber(180));
+
+        report(MARCH_1, MARCH_31, "sportId", SeedData.SPORT_SWIMMING.toString())
+                .statusCode(200)
+                .body("items.size()", equalTo(1))
+                .body(SWIMMING_ITEM + ".revenue", isNumber(180));
+    }
 }
