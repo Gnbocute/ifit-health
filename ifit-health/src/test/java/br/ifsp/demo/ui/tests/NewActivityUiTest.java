@@ -78,4 +78,13 @@ class NewActivityUiTest extends UiTestBase {
 
         assertThat(form.formErrors()).containsExactly("A modalidade Natação exige sala do tipo Piscina.");
     }
+
+    @Test
+    @DisplayName("mostra o erro do back-end quando a sala já está ocupada")
+    void shouldShowRoomConflictFromBackEnd() {
+        form.fill("Natação", "Piscina", "Maria Silva", List.of("Segunda"), "12:00", "13:00", "10", "100").submit();
+
+        assertThat(form.apiError()).isEqualTo("Room is already booked for the given schedule");
+        assertThat(DbFixtures.count("SELECT COUNT(*) FROM activity_class")).isEqualTo(1);
+    }
 }
