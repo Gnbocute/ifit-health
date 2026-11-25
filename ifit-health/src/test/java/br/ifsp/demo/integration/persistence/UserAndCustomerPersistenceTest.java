@@ -108,4 +108,12 @@ class UserAndCustomerPersistenceTest extends PersistenceTestBase {
     void shouldReturnEmptyForUnknownId() {
         assertThat(customerRepository.findById(UUID.randomUUID())).isEmpty();
     }
+
+    @Test
+    @DisplayName("encontra o cliente pelo CPF")
+    void shouldFindByCpf() {
+        assertThat(customerRepository.findByCpf(SeedData.ANA_CPF)).get()
+                .extracting(Customer::getId).isEqualTo(SeedData.ANA_CUSTOMER_ID);
+        assertThat(customerRepository.findByCpf(FakeData.cpf())).isEmpty();
+    }
 }
