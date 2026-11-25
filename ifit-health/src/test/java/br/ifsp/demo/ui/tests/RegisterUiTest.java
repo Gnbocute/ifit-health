@@ -73,4 +73,12 @@ class RegisterUiTest extends UiTestBase {
 
         assertThat(register.formErrors()).containsExactly("As senhas não conferem.");
     }
+
+    @Test
+    @DisplayName("rejeita CPF com dígito verificador inválido na tela de cadastro")
+    void shouldRejectInvalidCpf() {
+        RegisterPage register = fillValidForm(FakeData.email(), FakeData.password()).fillCpf("12345678900").submit();
+
+        assertThat(register.formErrors()).containsExactly("Informe um CPF válido.");
+    }
 }
