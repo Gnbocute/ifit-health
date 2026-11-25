@@ -161,4 +161,10 @@ class ActivityReportApiTest extends ApiTestBase {
                 .statusCode(200)
                 .body(SWIMMING_ITEM + ".averageOccupancyPercent", isNumber(10.0));
     }
+
+    @Test
+    @DisplayName("aceita data inicial igual à final no relatório")
+    void shouldAcceptSingleDayPeriod() {
+        report(MARCH_1, MARCH_1).statusCode(200).body("startDate", equalTo(MARCH_1.toString()));
+    }
 }
