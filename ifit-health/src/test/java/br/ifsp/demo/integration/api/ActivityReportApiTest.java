@@ -175,4 +175,14 @@ class ActivityReportApiTest extends ApiTestBase {
                 .statusCode(400)
                 .body("message", equalTo("End date cannot be before start date"));
     }
+
+    @Test
+    @DisplayName("retorna 404 para modalidade desconhecida no relatório")
+    void shouldRejectUnknownSport() {
+        UUID unknown = UUID.randomUUID();
+
+        report(MARCH_1, MARCH_31, "sportId", unknown.toString())
+                .statusCode(404)
+                .body("message", equalTo("Sport not found: " + unknown));
+    }
 }
