@@ -29,6 +29,12 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
             activityClassRepository.findTrainerById(SeedData.TRAINER_JOHN), schedule, capacity, new BigDecimal(fee));
     }
 
+    private ActivityClass changeFee(ActivityClass activity, String fee) {
+        activity.edit(activity.getRoom(), activity.getSport(), activity.getTrainer(), activity.getSchedule(),
+                activity.getCapacity(), new BigDecimal(fee));
+        return activityClassRepository.save(activity);
+    }
+
     @Test
     @DisplayName("insere a atividade e o primeiro preço válido a partir de hoje")
     void shouldInsertActivityWithInitialPrice() {
@@ -119,5 +125,16 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
             SeedData.SWIMMING_CLASS.toString(),
             new BigDecimal("200")
         )).isEqualTo(nextMonth.toString());
+    }
+
+    @Test
+    @DisplayName("substitui a mensalidade agendada quando muda de novo no mesmo mês")
+    void shouldReplaceScheduledFee() {
+        changeFee(activity(SeedData.SWIMMING_CLASS), "200");
+        changeFee(activity(SeedData.SWIMMING_CLASS), "220");
+
+        assertThat(activityClassRepository.findPriceHistory(SeedData.SWIMMING_CLASS)).extracting(BigDecimal::intValue)
+                .containsExactly(180, 220);
+        assertThat(activityClassRepository.findLatestPrice(SeedData.SWIMMING_CLASS, BigDecimal.ONE)).isEqualByComparingTo("220");
     }
 }
