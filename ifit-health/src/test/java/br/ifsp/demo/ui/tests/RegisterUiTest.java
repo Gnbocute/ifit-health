@@ -33,4 +33,19 @@ class RegisterUiTest extends UiTestBase {
         register.waitForPath("/aluno/atividades");
         assertThat(DbFixtures.text("SELECT role FROM app_user WHERE email = ?", email)).isEqualTo("USER");
     }
+
+    @Test
+    @DisplayName("cria a conta com endereço")
+    void shouldRegisterStudentWithAddress() {
+        String email = FakeData.email();
+        String city = FakeData.faker().address().city();
+        fillValidForm(email, FakeData.password())
+                .enableAddress()
+                .fillAddress("13560000", "100", FakeData.faker().address().streetName(), city, "sp")
+                .submit()
+                .waitForPath("/aluno/atividades");
+
+        assertThat(DbFixtures.text("SELECT address_city || '/' || address_state || '/' || address_cep FROM customers WHERE email = ?", email))
+                .isEqualTo(city + "/SP/13560-000");
+    }
 }
