@@ -83,4 +83,15 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
         assertThat(activityClassRepository.findAll()).extracting(ActivityClass::getId)
             .containsExactlyInAnyOrder(SeedData.SWIMMING_CLASS, inactive);
     }
+
+    @Test
+    @DisplayName("mapeia sala, modalidade e professor e retorna null quando não existem")
+    void shouldFindCatalogItemsById() {
+        assertThat(activityClassRepository.findRoomById(SeedData.ROOM_POOL).getCapacity()).isEqualTo(SeedData.ROOM_POOL_CAPACITY);
+        assertThat(activityClassRepository.findSportById(SeedData.SPORT_SWIMMING).getName()).isEqualTo(SeedData.SWIMMING_NAME);
+        assertThat(activityClassRepository.findTrainerById(SeedData.TRAINER_JULIANA).getName()).isEqualTo(SeedData.TRAINER_JULIANA_NAME);
+        assertThat(activityClassRepository.findRoomById(UUID.randomUUID())).isNull();
+        assertThat(activityClassRepository.findSportById(UUID.randomUUID())).isNull();
+        assertThat(activityClassRepository.findTrainerById(UUID.randomUUID())).isNull();
+    }
 }
