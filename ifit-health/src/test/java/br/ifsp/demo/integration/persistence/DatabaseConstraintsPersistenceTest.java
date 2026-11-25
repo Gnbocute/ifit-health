@@ -142,4 +142,16 @@ class DatabaseConstraintsPersistenceTest extends PersistenceTestBase {
                 UUID.randomUUID().toString(), SeedData.SWIMMING_CLASS.toString(), date.toString())
                 .hasMessageContaining("UNIQUE constraint failed: activity_prices.activity_id, activity_prices.valid_from");
     }
+
+    @Test
+    @DisplayName("exige atividade e matrícula existentes em enrollment_activities")
+    void shouldRejectEnrollmentActivityWithUnknownReferences() {
+        UUID enrollment = DbFixtures.insertEnrollment(DbFixtures.insertCustomer(), true);
+        String sql = "INSERT INTO enrollment_activities (id, enrollment_id, activity_id, monthly_fee, start_date) VALUES (?, ?, ?, 10, '2026-01-01')";
+
+        assertRejected(sql, UUID.randomUUID().toString(), enrollment.toString(), UUID.randomUUID().toString())
+                .hasMessageContaining("FOREIGN KEY constraint failed");
+        assertRejected(sql, UUID.randomUUID().toString(), UUID.randomUUID().toString(), SeedData.SWIMMING_CLASS.toString())
+                .hasMessageContaining("FOREIGN KEY constraint failed");
+    }
 }
