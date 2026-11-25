@@ -11,10 +11,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Tag("PersistenceTest")
 @Tag("IntegrationTest")
@@ -53,5 +55,12 @@ class UserAndCustomerPersistenceTest extends PersistenceTestBase {
 
         assertThat(DbFixtures.text("SELECT role FROM app_user WHERE id = ?", user.getId().toString())).isEqualTo("USER");
         assertThat(userRepository.count()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("falha ao gravar e-mail que só muda nas maiúsculas")
+    void shouldRejectDuplicatedEmail() {
+        assertThatThrownBy(() -> userRepository.saveAndFlush(newUser(SeedData.ADMIN_EMAIL.toUpperCase())))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 }
