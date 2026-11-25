@@ -77,4 +77,12 @@ class MyActivitiesUiTest extends UiTestBase {
         assertThat(page.dialogError()).isEqualTo("A data de encerramento não pode ser anterior à data de início.");
         assertThat(DbFixtures.text("SELECT status FROM enrollment_activities")).isEqualTo("ACTIVE");
     }
+
+    @Test
+    @DisplayName("mantém a atividade ativa ao fechar o diálogo com Voltar")
+    void shouldGoBackFromDialog() {
+        MyActivitiesPage page = openEnrolledInSwimming().openCancel(SWIMMING).backFromDialog();
+
+        assertThat(page.tab(0)).isEqualTo("Ativas (1)");
+    }
 }
