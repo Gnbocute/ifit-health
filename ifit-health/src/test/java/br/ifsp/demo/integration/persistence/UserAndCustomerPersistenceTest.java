@@ -124,4 +124,11 @@ class UserAndCustomerPersistenceTest extends PersistenceTestBase {
                 .extracting(Customer::getId).isEqualTo(SeedData.ANA_CUSTOMER_ID);
         assertThat(customerRepository.findByUserId(UUID.randomUUID())).isEmpty();
     }
+
+    @Test
+    @DisplayName("ignora maiúsculas ao verificar e-mail de cliente")
+    void shouldCheckEmailIgnoringCase() {
+        assertThat(customerRepository.existsByEmailIgnoreCase(SeedData.ANA_EMAIL.toUpperCase())).isTrue();
+        assertThat(customerRepository.existsByEmailIgnoreCase(FakeData.email())).isFalse();
+    }
 }
