@@ -97,4 +97,12 @@ class EditActivityUiTest extends UiTestBase {
 
         assertThat(page.errorBox()).isEqualTo("Activity class not found: " + unknown);
     }
+
+    @Test
+    @DisplayName("volta para a lista sem salvar ao cancelar a edição")
+    void shouldCancel() {
+        AdminActivitiesPage list = openSwimming().setCapacity("5").cancel();
+
+        assertThat(list.cell(SeedData.SWIMMING_NAME, 4)).isEqualTo("0/20");
+    }
 }
