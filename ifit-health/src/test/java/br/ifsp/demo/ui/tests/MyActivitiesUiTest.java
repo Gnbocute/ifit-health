@@ -3,7 +3,9 @@ package br.ifsp.demo.ui.tests;
 import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.SeedData;
 import br.ifsp.demo.ui.UiTestBase;
+import br.ifsp.demo.ui.pages.AppShell;
 import br.ifsp.demo.ui.pages.MyActivitiesPage;
+import br.ifsp.demo.ui.pages.StudentActivitiesPage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -84,5 +86,17 @@ class MyActivitiesUiTest extends UiTestBase {
         MyActivitiesPage page = openEnrolledInSwimming().openCancel(SWIMMING).backFromDialog();
 
         assertThat(page.tab(0)).isEqualTo("Ativas (1)");
+    }
+
+    @Test
+    @DisplayName("libera a vaga para a atividade ser escolhida de novo")
+    void shouldAllowEnrollingAgainAfterCancel() {
+        MyActivitiesPage page = openEnrolledInSwimming().openCancel(SWIMMING).confirmCancel().waitDialogClosed();
+        assertThat(page.tab(1)).isEqualTo("Histórico (1)");
+
+        new AppShell(driver).navigateTo("Atividades disponíveis");
+        StudentActivitiesPage available = new StudentActivitiesPage(driver).waitUntilLoaded();
+
+        assertThat(available.badge(SWIMMING)).isEqualTo("20 vagas");
     }
 }
