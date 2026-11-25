@@ -131,4 +131,16 @@ class UserAndCustomerPersistenceTest extends PersistenceTestBase {
         assertThat(customerRepository.existsByEmailIgnoreCase(SeedData.ANA_EMAIL.toUpperCase())).isTrue();
         assertThat(customerRepository.existsByEmailIgnoreCase(FakeData.email())).isFalse();
     }
+
+    @Test
+    @DisplayName("vincula conta só a cliente que ainda não tem conta")
+    void shouldAttachUserOnlyOnce() {
+        UUID customerId = DbFixtures.insertCustomer();
+        User user = userRepository.saveAndFlush(newUser(FakeData.email()));
+        User other = userRepository.saveAndFlush(newUser(FakeData.email()));
+
+        assertThat(customerRepository.attachUserToExistingCustomer(customerId, user.getId())).isTrue();
+        assertThat(customerRepository.attachUserToExistingCustomer(customerId, other.getId())).isFalse();
+        assertThat(customer(customerId).getUserId()).isEqualTo(user.getId());
+    }
 }
