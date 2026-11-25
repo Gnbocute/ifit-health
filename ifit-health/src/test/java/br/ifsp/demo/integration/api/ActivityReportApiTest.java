@@ -204,4 +204,11 @@ class ActivityReportApiTest extends ApiTestBase {
         as(newStudent()).queryParam("startDate", MARCH_1.toString()).queryParam("endDate", MARCH_31.toString())
                 .when().get("/activity-reports").then().statusCode(403);
     }
+
+    @Test
+    @DisplayName("retorna 401 no relatório sem token")
+    void shouldRequireAuthentication() {
+        anonymous().queryParam("startDate", MARCH_1.toString()).queryParam("endDate", MARCH_31.toString())
+                .when().get("/activity-reports").then().statusCode(401);
+    }
 }
