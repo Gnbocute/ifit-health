@@ -64,4 +64,13 @@ class RegisterUiTest extends UiTestBase {
                 "O gênero é obrigatório.");
         assertThat(register.currentPath()).isEqualTo("/cadastro");
     }
+
+    @Test
+    @DisplayName("rejeita senha e confirmação diferentes")
+    void shouldRejectDifferentPasswords() {
+        RegisterPage register = fillValidForm(FakeData.email(), FakeData.password());
+        register.fillAccess(FakeData.email(), "senhaForte123", "outraSenha123").submit();
+
+        assertThat(register.formErrors()).containsExactly("As senhas não conferem.");
+    }
 }
