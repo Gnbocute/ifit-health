@@ -54,4 +54,12 @@ class NewActivityUiTest extends UiTestBase {
             "Mensalidade deve ser maior ou igual a zero.");
         assertThat(form.currentPath()).isEqualTo("/admin/atividades/nova");
     }
+
+    @Test
+    @DisplayName("rejeita horário final antes do inicial no formulário")
+    void shouldRejectEndBeforeStart() {
+        form.fill("Musculação", "Sala de Musculação", "John Doe", List.of("Sexta"), "10:00", "09:00", "10", "100").submit();
+
+        assertThat(form.formErrors()).containsExactly("O horário de término deve ser após o início.");
+    }
 }
