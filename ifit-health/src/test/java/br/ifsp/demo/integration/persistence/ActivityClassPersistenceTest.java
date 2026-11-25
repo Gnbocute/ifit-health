@@ -146,4 +146,15 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
         assertThat(DbFixtures.count("SELECT COUNT(*) FROM activity_prices WHERE activity_id = ?",
                 SeedData.SWIMMING_CLASS.toString())).isEqualTo(1);
     }
+
+    @Test
+    @DisplayName("registra a mensalidade original antes da primeira mudança de preço")
+    void shouldCreateInitialHistoryForLegacyActivity() {
+        UUID legacy = DbFixtures.insertActivity(SeedData.SPORT_JUDO, SeedData.ROOM_JUDO, SeedData.TRAINER_CARLOS,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), 10, new BigDecimal("90"), true, DayOfWeek.FRIDAY);
+
+        changeFee(activity(legacy), "95");
+
+        assertThat(activityClassRepository.findPriceHistory(legacy)).extracting(BigDecimal::intValue).containsExactly(90, 95);
+    }
 }
