@@ -274,4 +274,17 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
             .singleElement()
             .satisfies(r -> assertThat(r.capacity()).isEqualTo(SeedData.ROOM_GYM_CAPACITY));
     }
+
+    @Test
+    @DisplayName("mapeia professores inativos também, ordenados por nome")
+    void shouldFindTrainers() {
+        DbFixtures.update("UPDATE trainer SET active = 0 WHERE id = ?", SeedData.TRAINER_JOHN.toString());
+
+        var trainers = catalogQueries.findTrainers();
+
+        assertThat(trainers).hasSize(SeedData.TRAINERS_COUNT);
+        assertThat(trainers).extracting(SqliteCatalogQueries.TrainerRow::name).isSorted();
+        assertThat(trainers).filteredOn(t -> t.id().equals(SeedData.TRAINER_JOHN)).singleElement()
+            .satisfies(t -> assertThat(t.active()).isFalse());
+    }
 }
