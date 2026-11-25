@@ -265,4 +265,13 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
                 assertThat(s.active()).isTrue();
             });
     }
+
+    @Test
+    @DisplayName("mapeia todas as salas com capacidade")
+    void shouldFindRooms() {
+        assertThat(catalogQueries.findRooms()).hasSize(SeedData.ROOMS_COUNT)
+            .filteredOn(r -> r.id().equals(SeedData.ROOM_GYM))
+            .singleElement()
+            .satisfies(r -> assertThat(r.capacity()).isEqualTo(SeedData.ROOM_GYM_CAPACITY));
+    }
 }
