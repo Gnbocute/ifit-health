@@ -7,6 +7,8 @@ import br.ifsp.demo.support.SeedData;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.UUID;
 
@@ -18,6 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DatabaseConstraintsPersistenceTest extends PersistenceTestBase {
     private static final String INSERT_USER =
             "INSERT INTO app_user (id, name, lastname, email, password, role) VALUES (?, 'Teste', 'Teste', ?, 'x', ?)";
+    private static final String INSERT_ACTIVITY = """
+            INSERT INTO activity_class (id, sport_id, room_id, coach_id, weekday, start_time, end_time, capacity, monthly_fee)
+            VALUES (?, ?, ?, ?, 'FRIDAY', '07:00', '08:00', ?, ?)
+            """;
 
     @Test
     @DisplayName("exige e-mail único em app_user sem diferenciar maiúsculas")
@@ -88,5 +94,14 @@ class DatabaseConstraintsPersistenceTest extends PersistenceTestBase {
         String id = UUID.randomUUID().toString();
         DbFixtures.update("INSERT INTO enrollments (id, customer_id, enroll_date) VALUES (?, ?, '2026-01-01')", id, customer.toString());
         assertThat(DbFixtures.text("SELECT status FROM enrollments WHERE id = ?", id)).isEqualTo("ACTIVE");
+    }
+
+    @ParameterizedTest(name = "capacity = {0}")
+    @ValueSource(ints = {0, -1})
+    @DisplayName("exige capacidade maior que zero em activity_class")
+    void shouldRejectActivityWithoutCapacity(int capacity) {
+        assertRejected(INSERT_ACTIVITY, UUID.randomUUID().toString(), SeedData.SPORT_JUDO.toString(), SeedData.ROOM_JUDO.toString(),
+                SeedData.TRAINER_JOHN.toString(), capacity, "10")
+                .hasMessageContaining("CHECK constraint failed");
     }
 }
