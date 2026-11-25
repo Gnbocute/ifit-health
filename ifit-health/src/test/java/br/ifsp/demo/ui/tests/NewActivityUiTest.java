@@ -2,6 +2,7 @@ package br.ifsp.demo.ui.tests;
 
 import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.FakeData;
+import br.ifsp.demo.support.SeedData;
 import br.ifsp.demo.ui.UiTestBase;
 import br.ifsp.demo.ui.pages.ActivityFormPage;
 import br.ifsp.demo.ui.pages.AdminActivitiesPage;
@@ -98,5 +99,15 @@ class NewActivityUiTest extends UiTestBase {
         assertThat(form.hasFormErrors())
             .as("validação local esperada, mas o formulário só mostrou a mensagem do back-end: %s",
                 form.hasFormErrors() ? "" : form.apiError()).isTrue();
+    }
+
+    @Test
+    @DisplayName("volta para a lista sem salvar ao cancelar a nova atividade")
+    void shouldCancel() {
+        form.chooseSport("Judô");
+
+        AdminActivitiesPage list = form.cancel();
+
+        assertThat(list.sports()).containsExactly(SeedData.SWIMMING_NAME);
     }
 }
