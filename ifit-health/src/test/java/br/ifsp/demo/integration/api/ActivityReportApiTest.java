@@ -185,4 +185,10 @@ class ActivityReportApiTest extends ApiTestBase {
                 .statusCode(404)
                 .body("message", equalTo("Sport not found: " + unknown));
     }
+
+    @Test
+    @DisplayName("retorna 400 quando falta a data inicial obrigatória no relatório")
+    void shouldRejectMissingStartDate() {
+        asAdmin().queryParam("endDate", MARCH_31.toString()).when().get("/activity-reports").then().statusCode(400);
+    }
 }
