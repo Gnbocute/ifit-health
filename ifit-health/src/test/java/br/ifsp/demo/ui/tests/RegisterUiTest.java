@@ -81,4 +81,16 @@ class RegisterUiTest extends UiTestBase {
 
         assertThat(register.formErrors()).containsExactly("Informe um CPF válido.");
     }
+
+    @Test
+    @DisplayName("bloqueia data de nascimento no futuro (validação de data máxima do navegador)")
+    void shouldRejectFutureBirthdate() {
+        String email = FakeData.email();
+        RegisterPage register = fillValidForm(email, FakeData.password())
+                .fillBirthdate(FakeData.futureDate().plusDays(2)).submit();
+
+        assertThat(register.birthdateValidationMessage()).isNotBlank();
+        assertThat(register.currentPath()).isEqualTo("/cadastro");
+        assertThat(DbFixtures.count("SELECT COUNT(*) FROM app_user WHERE email = ?", email)).isZero();
+    }
 }
