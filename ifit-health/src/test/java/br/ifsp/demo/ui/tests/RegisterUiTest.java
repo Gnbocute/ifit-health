@@ -1,0 +1,36 @@
+package br.ifsp.demo.ui.tests;
+
+import br.ifsp.demo.support.DbFixtures;
+import br.ifsp.demo.support.FakeData;
+import br.ifsp.demo.ui.UiTestBase;
+import br.ifsp.demo.ui.pages.RegisterPage;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@Tag("UiTest")
+@DisplayName("UI - Tela de cadastro de aluno")
+class RegisterUiTest extends UiTestBase {
+    private RegisterPage fillValidForm(String email, String password) {
+        return new RegisterPage(driver).open()
+                .fillName(FakeData.firstName(), FakeData.lastName())
+                .fillCpf(FakeData.cpf())
+                .fillBirthdate(FakeData.birthdate())
+                .chooseGender("Feminino")
+                .fillPhone(FakeData.phone())
+                .fillAccess(email, password, password);
+    }
+
+    @Test
+    @DisplayName("cria a conta, entra e abre a área do aluno")
+    void shouldRegisterStudent() {
+        String email = FakeData.email();
+        RegisterPage register = fillValidForm(email, FakeData.password()).submit();
+
+        assertThat(register.toast()).isEqualTo("Conta criada com sucesso!");
+        register.waitForPath("/aluno/atividades");
+        assertThat(DbFixtures.text("SELECT role FROM app_user WHERE email = ?", email)).isEqualTo("USER");
+    }
+}
