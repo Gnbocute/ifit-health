@@ -37,4 +37,12 @@ class DatabaseConstraintsPersistenceTest extends PersistenceTestBase {
                 UUID.randomUUID().toString(), SeedData.ANA_CPF, FakeData.email())
                 .hasMessageContaining("UNIQUE constraint failed: customers.cpf");
     }
+
+    @Test
+    @DisplayName("permite vincular uma conta a um único cliente")
+    void shouldRejectSecondCustomerForSameUser() {
+        assertRejected("INSERT INTO customers (id, user_id, cpf, name, birthdate, gender, email) VALUES (?, ?, ?, 'X', '2000-01-01', 'MALE', ?)",
+                UUID.randomUUID().toString(), SeedData.ANA_USER_ID.toString(), FakeData.cpf(), FakeData.email())
+                .hasMessageContaining("UNIQUE constraint failed: customers.user_id");
+    }
 }
