@@ -423,4 +423,15 @@ class ActivityClassApiTest extends ApiTestBase {
         asAdmin().body(body).when().put("/activity-classes/{id}", SeedData.SWIMMING_CLASS).then().statusCode(200)
             .body("endTime", equalTo("13:00:00"));
     }
+
+    @ParameterizedTest(name = "[{index}] {0} = {1}")
+    @MethodSource("invalidFields")
+    @DisplayName("retorna 400 e identifica o campo inválido ao editar atividade")
+    void shouldRejectInvalidFieldOnEdit(String field, Object value) {
+        Map<String, Object> body = validRequest();
+        body.put(field, value);
+
+        asAdmin().body(body).when().put("/activity-classes/{id}", SeedData.SWIMMING_CLASS).then().statusCode(400)
+            .body("errors." + field, not(emptyOrNullString()));
+    }
 }
