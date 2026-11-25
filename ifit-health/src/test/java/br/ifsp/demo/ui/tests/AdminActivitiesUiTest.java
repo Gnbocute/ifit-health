@@ -1,11 +1,16 @@
 package br.ifsp.demo.ui.tests;
 
+import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.SeedData;
 import br.ifsp.demo.ui.UiTestBase;
 import br.ifsp.demo.ui.pages.AdminActivitiesPage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,5 +31,20 @@ class AdminActivitiesUiTest extends UiTestBase {
         assertThat(page.cell(SeedData.SWIMMING_NAME, 4)).isEqualTo("0/20");
         assertThat(page.cell(SeedData.SWIMMING_NAME, 5)).isEqualTo("R$ 180,00");
         assertThat(page.cell(SeedData.SWIMMING_NAME, 6)).isEqualTo("Ativa");
+    }
+
+    @Test
+    @DisplayName("mostra o número de matriculados e as atividades inativas")
+    void shouldShowEnrollmentsAndStatus() {
+        DbFixtures.fillActivity(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, 2);
+        DbFixtures.insertActivity(SeedData.SPORT_JUDO, SeedData.ROOM_JUDO, SeedData.TRAINER_CARLOS,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), 10, new BigDecimal("90"), false, DayOfWeek.FRIDAY);
+
+        loginAsAdmin();
+        AdminActivitiesPage page = new AdminActivitiesPage(driver).waitUntilLoaded();
+
+        assertThat(page.rowCount()).isEqualTo(2);
+        assertThat(page.cell(SeedData.SWIMMING_NAME, 4)).isEqualTo("2/20");
+        assertThat(page.cell("Judô", 6)).isEqualTo("Inativa");
     }
 }
