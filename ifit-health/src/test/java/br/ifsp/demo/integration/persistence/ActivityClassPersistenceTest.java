@@ -14,6 +14,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.EnumSet;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,5 +54,11 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
         assertThat(activity.getCapacity()).isEqualTo(SeedData.SWIMMING_CAPACITY);
         assertThat(activity.getMonthlyFee()).isEqualByComparingTo(SeedData.SWIMMING_FEE);
         assertThat(activity.isActive()).isTrue();
+    }
+
+    @Test
+    @DisplayName("retorna null ao buscar atividade com id desconhecido no repositório")
+    void shouldReturnNullForUnknownId() {
+        assertThat(activityClassRepository.findById(UUID.randomUUID())).isNull();
     }
 }
