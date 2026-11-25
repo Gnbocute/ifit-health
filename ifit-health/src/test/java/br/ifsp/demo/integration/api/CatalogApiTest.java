@@ -56,4 +56,12 @@ class CatalogApiTest extends ApiTestBase {
 
         assertThat(names).isSortedAccordingTo(Collator.getInstance(Locale.forLanguageTag("pt-BR")));
     }
+
+    @Test
+    @DisplayName("retorna modalidades em ordem alfabética do pt-BR, com acentos")
+    void shouldSortSportsAlphabetically() {
+        List<String> names = asAdmin().when().get("/sports").then().statusCode(200).extract().path("name");
+
+        assertThat(names).isSortedAccordingTo(Collator.getInstance(Locale.forLanguageTag("pt-BR")));
+    }
 }
