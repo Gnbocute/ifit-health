@@ -42,4 +42,12 @@ class EditActivityUiTest extends UiTestBase {
         assertThat(list.toast()).isEqualTo("Atividade atualizada!");
         assertThat(list.cell(SeedData.SWIMMING_NAME, 4)).isEqualTo("0/" + capacity);
     }
+
+    @Test
+    @DisplayName("mostra a nova mensalidade ao admin depois de editar")
+    void shouldEditFee() {
+        AdminActivitiesPage list = openSwimming().setMonthlyFee("215.50").submitAndReturnToList();
+
+        assertThat(list.cell(SeedData.SWIMMING_NAME, 5)).isEqualTo("R$ 215,50");
+    }
 }
