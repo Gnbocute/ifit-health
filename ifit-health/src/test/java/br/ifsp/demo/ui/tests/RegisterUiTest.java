@@ -2,6 +2,7 @@ package br.ifsp.demo.ui.tests;
 
 import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.FakeData;
+import br.ifsp.demo.support.SeedData;
 import br.ifsp.demo.ui.UiTestBase;
 import br.ifsp.demo.ui.pages.RegisterPage;
 import org.junit.jupiter.api.DisplayName;
@@ -92,5 +93,14 @@ class RegisterUiTest extends UiTestBase {
         assertThat(register.birthdateValidationMessage()).isNotBlank();
         assertThat(register.currentPath()).isEqualTo("/cadastro");
         assertThat(DbFixtures.count("SELECT COUNT(*) FROM app_user WHERE email = ?", email)).isZero();
+    }
+
+    @Test
+    @DisplayName("mostra a mensagem do back-end para e-mail já cadastrado")
+    void shouldShowDuplicatedEmailError() {
+        RegisterPage register = fillValidForm(SeedData.ANA_EMAIL, FakeData.password()).submit();
+
+        assertThat(register.formErrors()).containsExactly("Este e-mail já está cadastrado.");
+        assertThat(register.currentPath()).isEqualTo("/cadastro");
     }
 }
