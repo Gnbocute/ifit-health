@@ -113,4 +113,17 @@ class ActivityReportApiTest extends ApiTestBase {
                 .body("items[0].enrollmentCount", equalTo(1))
                 .body("items[0].revenue", isNumber(100));
     }
+
+    @Test
+    @DisplayName("retorna só as atividades do dia da semana filtrado no relatório")
+    void shouldFilterByWeekday() {
+        UUID judo = judoOnTuesday();
+        DbFixtures.enrollNewCustomer(judo, new BigDecimal("100"), MARCH_1);
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, MARCH_1);
+
+        report(MARCH_1, MARCH_31, "dayOfWeek", "MONDAY")
+                .statusCode(200)
+                .body("items.size()", equalTo(1))
+                .body("items[0].activityClassId", equalTo(SeedData.SWIMMING_CLASS.toString()));
+    }
 }
