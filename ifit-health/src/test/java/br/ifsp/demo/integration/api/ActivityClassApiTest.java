@@ -409,4 +409,18 @@ class ActivityClassApiTest extends ApiTestBase {
             .body("affectedStudents[0].conflictingActivities[0].activityClassId", equalTo(SeedData.SWIMMING_CLASS.toString()))
             .body("affectedStudents[0].conflictingActivities[0].sportName", equalTo(SeedData.SWIMMING_NAME));
     }
+
+    @Test
+    @DisplayName("não acusa o próprio horário como conflito de sala ou professor")
+    void shouldIgnoreItsOwnSchedule() {
+        Map<String, Object> body = validRequest();
+        body.put("weekdays", List.of(SeedData.SWIMMING_DAY.name()));
+        body.put("startTime", SeedData.SWIMMING_START.toString());
+        body.put("endTime", "13:00:00");
+        body.put("capacity", SeedData.SWIMMING_CAPACITY);
+        body.put("monthlyFee", SeedData.SWIMMING_FEE);
+
+        asAdmin().body(body).when().put("/activity-classes/{id}", SeedData.SWIMMING_CLASS).then().statusCode(200)
+            .body("endTime", equalTo("13:00:00"));
+    }
 }
