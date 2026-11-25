@@ -116,4 +116,17 @@ class DatabaseConstraintsPersistenceTest extends PersistenceTestBase {
                 SeedData.TRAINER_JOHN.toString(), 10, "0");
         assertThat(DbFixtures.count("SELECT COUNT(*) FROM activity_class WHERE monthly_fee = 0")).isEqualTo(1);
     }
+
+    @Test
+    @DisplayName("exige modalidade, sala e professor existentes em activity_class")
+    void shouldRejectActivityWithUnknownReferences() {
+        String unknown = UUID.randomUUID().toString();
+
+        assertRejected(INSERT_ACTIVITY, UUID.randomUUID().toString(), unknown, SeedData.ROOM_JUDO.toString(),
+                SeedData.TRAINER_JOHN.toString(), 10, "10").hasMessageContaining("FOREIGN KEY constraint failed");
+        assertRejected(INSERT_ACTIVITY, UUID.randomUUID().toString(), SeedData.SPORT_JUDO.toString(), unknown,
+                SeedData.TRAINER_JOHN.toString(), 10, "10").hasMessageContaining("FOREIGN KEY constraint failed");
+        assertRejected(INSERT_ACTIVITY, UUID.randomUUID().toString(), SeedData.SPORT_JUDO.toString(), SeedData.ROOM_JUDO.toString(),
+                unknown, 10, "10").hasMessageContaining("FOREIGN KEY constraint failed");
+    }
 }
