@@ -167,4 +167,12 @@ class ActivityReportApiTest extends ApiTestBase {
     void shouldAcceptSingleDayPeriod() {
         report(MARCH_1, MARCH_1).statusCode(200).body("startDate", equalTo(MARCH_1.toString()));
     }
+
+    @Test
+    @DisplayName("retorna 400 quando a data final é anterior à inicial no relatório")
+    void shouldRejectEndBeforeStart() {
+        report(MARCH_31, MARCH_1)
+                .statusCode(400)
+                .body("message", equalTo("End date cannot be before start date"));
+    }
 }
