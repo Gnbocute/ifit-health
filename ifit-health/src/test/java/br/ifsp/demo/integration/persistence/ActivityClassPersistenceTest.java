@@ -4,6 +4,7 @@ import br.ifsp.demo.domain.model.ActivityClass;
 import br.ifsp.demo.domain.model.Schedule;
 import br.ifsp.demo.persistence.sqlite.SqliteActivityClassQueries;
 import br.ifsp.demo.persistence.sqlite.SqliteActivityClassQueries.ActivityClassRow;
+import br.ifsp.demo.persistence.sqlite.SqliteCatalogQueries;
 import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.PersistenceTestBase;
 import br.ifsp.demo.support.SeedData;
@@ -27,6 +28,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ActivityClassPersistenceTest extends PersistenceTestBase {
     @Autowired
     private SqliteActivityClassQueries activityQueries;
+
+    @Autowired
+    private SqliteCatalogQueries catalogQueries;
 
     private static final LocalDate NEXT_MONTH = LocalDate.now().withDayOfMonth(1).plusMonths(1);
 
@@ -246,5 +250,19 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
         DbFixtures.insertPrice(SeedData.SWIMMING_CLASS, new BigDecimal("260"), NEXT_MONTH);
 
         assertThat(row(SeedData.SWIMMING_CLASS, false).monthlyFee()).isEqualByComparingTo("190");
+    }
+
+    @Test
+    @DisplayName("mapeia todas as modalidades do catálogo")
+    void shouldFindSports() {
+        var sports = catalogQueries.findSports();
+
+        assertThat(sports).hasSize(SeedData.SPORTS_COUNT);
+        assertThat(sports).filteredOn(s -> s.id().equals(SeedData.SPORT_SWIMMING))
+            .singleElement().satisfies(s -> {
+                assertThat(s.name()).isEqualTo(SeedData.SWIMMING_NAME);
+                assertThat(s.roomType().name()).isEqualTo("POOL");
+                assertThat(s.active()).isTrue();
+            });
     }
 }
