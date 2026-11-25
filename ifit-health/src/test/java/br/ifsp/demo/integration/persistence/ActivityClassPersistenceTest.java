@@ -61,4 +61,16 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
     void shouldReturnNullForUnknownId() {
         assertThat(activityClassRepository.findById(UUID.randomUUID())).isNull();
     }
+
+    @Test
+    @DisplayName("busca por sala e por professor retorna só atividades ativas")
+    void shouldFindOnlyActiveActivitiesByRoomAndTrainer() {
+        DbFixtures.insertActivity(SeedData.SPORT_SWIMMING, SeedData.ROOM_POOL, SeedData.TRAINER_JULIANA,
+            LocalTime.of(15, 0), LocalTime.of(16, 0), 5, new BigDecimal("100"), false, DayOfWeek.FRIDAY);
+        var room = activityClassRepository.findRoomById(SeedData.ROOM_POOL);
+        var trainer = activityClassRepository.findTrainerById(SeedData.TRAINER_JULIANA);
+
+        assertThat(activityClassRepository.findByRoom(room)).extracting(ActivityClass::getId).containsExactly(SeedData.SWIMMING_CLASS);
+        assertThat(activityClassRepository.findByTrainer(trainer)).extracting(ActivityClass::getId).containsExactly(SeedData.SWIMMING_CLASS);
+    }
 }
