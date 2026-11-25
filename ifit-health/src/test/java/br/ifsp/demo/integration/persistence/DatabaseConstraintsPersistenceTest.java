@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -128,5 +130,16 @@ class DatabaseConstraintsPersistenceTest extends PersistenceTestBase {
                 SeedData.TRAINER_JOHN.toString(), 10, "10").hasMessageContaining("FOREIGN KEY constraint failed");
         assertRejected(INSERT_ACTIVITY, UUID.randomUUID().toString(), SeedData.SPORT_JUDO.toString(), SeedData.ROOM_JUDO.toString(),
                 unknown, 10, "10").hasMessageContaining("FOREIGN KEY constraint failed");
+    }
+
+    @Test
+    @DisplayName("permite um único preço por atividade e data de início")
+    void shouldRejectTwoPricesForSameDate() {
+        LocalDate date = LocalDate.of(2027, 1, 1);
+        DbFixtures.insertPrice(SeedData.SWIMMING_CLASS, new BigDecimal("200"), date);
+
+        assertRejected("INSERT INTO activity_prices (id, activity_id, monthly_fee, valid_from) VALUES (?, ?, 210, ?)",
+                UUID.randomUUID().toString(), SeedData.SWIMMING_CLASS.toString(), date.toString())
+                .hasMessageContaining("UNIQUE constraint failed: activity_prices.activity_id, activity_prices.valid_from");
     }
 }
