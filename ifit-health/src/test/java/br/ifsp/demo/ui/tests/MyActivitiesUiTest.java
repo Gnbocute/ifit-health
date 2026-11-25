@@ -67,4 +67,14 @@ class MyActivitiesUiTest extends UiTestBase {
         assertThat(page.showHistory().cardText(SWIMMING)).contains("Encerrada em: " + endDate.format(BR));
         assertThat(DbFixtures.text("SELECT status FROM enrollment_activities")).isEqualTo("INACTIVE");
     }
+
+    @Test
+    @DisplayName("bloqueia data de cancelamento anterior à data de início")
+    void shouldRejectDateBeforeStart() {
+        MyActivitiesPage page = openEnrolledInSwimming().openCancel(SWIMMING)
+                .setEndDate(LocalDate.now().minusDays(1)).confirmCancel();
+
+        assertThat(page.dialogError()).isEqualTo("A data de encerramento não pode ser anterior à data de início.");
+        assertThat(DbFixtures.text("SELECT status FROM enrollment_activities")).isEqualTo("ACTIVE");
+    }
 }
