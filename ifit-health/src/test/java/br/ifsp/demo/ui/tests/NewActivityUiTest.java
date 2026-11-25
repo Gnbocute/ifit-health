@@ -110,4 +110,15 @@ class NewActivityUiTest extends UiTestBase {
 
         assertThat(list.sports()).containsExactly(SeedData.SWIMMING_NAME);
     }
+
+    @Test
+    @DisplayName("mantém o formulário de nova atividade sem rolagem horizontal no celular")
+    void shouldBeResponsive() {
+        useMobileScreen();
+
+        form.fill("Musculação", "Sala de Musculação", "John Doe", List.of("Domingo"), "07:00", "08:00", "10", "99");
+
+        assertThat(form.hasHorizontalScroll()).isFalse();
+        assertThat(form.submitAndReturnToList().sports()).contains("Musculação");
+    }
 }
