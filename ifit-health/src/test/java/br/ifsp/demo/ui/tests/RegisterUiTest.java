@@ -113,4 +113,20 @@ class RegisterUiTest extends UiTestBase {
         assertThat(register.cpfValue()).isEqualTo("529.982.247-25");
         assertThat(register.cepValue()).isEqualTo("13560-001");
     }
+
+    @Test
+    @DisplayName("exige os campos de endereço só quando o endereço é ativado")
+    void shouldValidateAddressWhenEnabled() {
+        RegisterPage register = fillValidForm(FakeData.email(), FakeData.password());
+        assertThat(register.isAddressVisible()).isFalse();
+
+        register.enableAddress().submit();
+
+        assertThat(register.formErrors()).containsExactlyInAnyOrder(
+                "O CEP é obrigatório.",
+                "O número do endereço é obrigatório.",
+                "A rua é obrigatória.",
+                "A cidade é obrigatória.",
+                "Informe a sigla do estado com 2 letras.");
+    }
 }
