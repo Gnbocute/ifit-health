@@ -197,4 +197,11 @@ class ActivityReportApiTest extends ApiTestBase {
     void shouldRejectInvalidWeekday() {
         report(MARCH_1, MARCH_31, "dayOfWeek", "SEGUNDA").statusCode(400);
     }
+
+    @Test
+    @DisplayName("retorna 403 para aluno no relatório")
+    void shouldForbidStudents() {
+        as(newStudent()).queryParam("startDate", MARCH_1.toString()).queryParam("endDate", MARCH_31.toString())
+                .when().get("/activity-reports").then().statusCode(403);
+    }
 }
