@@ -2,6 +2,7 @@ package br.ifsp.demo.integration.persistence;
 
 import br.ifsp.demo.domain.model.ActivityClass;
 import br.ifsp.demo.domain.model.Schedule;
+import br.ifsp.demo.persistence.sqlite.SqliteActivityClassQueries;
 import br.ifsp.demo.persistence.sqlite.SqliteActivityClassQueries.ActivityClassRow;
 import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.PersistenceTestBase;
@@ -9,6 +10,7 @@ import br.ifsp.demo.support.SeedData;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
@@ -23,6 +25,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Tag("IntegrationTest")
 @DisplayName("Persistência de turmas, histórico de preços e catálogos")
 class ActivityClassPersistenceTest extends PersistenceTestBase {
+    @Autowired
+    private SqliteActivityClassQueries activityQueries;
+
     private ActivityClass newGymClass(int capacity, String fee) {
         Schedule schedule = new Schedule(EnumSet.of(DayOfWeek.TUESDAY, DayOfWeek.THURSDAY), LocalTime.of(8, 0), LocalTime.of(9, 0));
         return new ActivityClass(activityClassRepository.findRoomById(SeedData.ROOM_GYM),
@@ -196,5 +201,16 @@ class ActivityClassPersistenceTest extends PersistenceTestBase {
         assertThat(row.roomName()).isEqualTo("Piscina");
         assertThat(row.trainerName()).isEqualTo(SeedData.TRAINER_JULIANA_NAME);
         assertThat(row.weekdays()).isEqualTo("MONDAY");
+    }
+
+    @Test
+    @DisplayName("filtra a listagem de atividades pela flag de ativa")
+    void shouldFilterByActive() {
+        UUID inactive = DbFixtures.insertActivity(SeedData.SPORT_JUDO, SeedData.ROOM_JUDO, SeedData.TRAINER_CARLOS,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), 10, new BigDecimal("90"), false, DayOfWeek.FRIDAY);
+
+        assertThat(activityQueries.findAll(true)).extracting(ActivityClassRow::id).containsExactly(SeedData.SWIMMING_CLASS);
+        assertThat(activityQueries.findAll(false)).extracting(ActivityClassRow::id).containsExactly(inactive);
+        assertThat(activityQueries.findAll(null)).hasSize(2);
     }
 }
