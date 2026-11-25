@@ -4,6 +4,7 @@ import br.ifsp.demo.support.DbFixtures;
 import br.ifsp.demo.support.FakeData;
 import br.ifsp.demo.support.SeedData;
 import br.ifsp.demo.ui.UiTestBase;
+import br.ifsp.demo.ui.pages.AppShell;
 import br.ifsp.demo.ui.pages.RegisterPage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -128,5 +129,18 @@ class RegisterUiTest extends UiTestBase {
                 "A rua é obrigatória.",
                 "A cidade é obrigatória.",
                 "Informe a sigla do estado com 2 letras.");
+    }
+
+    @Test
+    @DisplayName("mantém o cadastro usável na tela de celular")
+    void shouldBeResponsive() {
+        useMobileScreen();
+
+        String email = FakeData.email();
+        fillValidForm(email, FakeData.password()).submit();
+
+        AppShell shell = new AppShell(driver);
+        shell.waitForPath("/aluno/atividades");
+        assertThat(shell.hasHorizontalScroll()).isFalse();
     }
 }
