@@ -443,4 +443,11 @@ class ActivityClassApiTest extends ApiTestBase {
         asAdmin().body(validRequest()).when().put("/activity-classes/{id}", unknown).then().statusCode(404)
             .body("message", equalTo("Activity class not found: " + unknown));
     }
+
+    @Test
+    @DisplayName("retorna 403 para aluno ao editar atividade")
+    void shouldForbidStudentsToEdit() {
+        as(newStudent()).body(validRequest()).when().put("/activity-classes/{id}", SeedData.SWIMMING_CLASS)
+            .then().statusCode(403);
+    }
 }
