@@ -143,4 +143,14 @@ class RegisterUiTest extends UiTestBase {
         shell.waitForPath("/aluno/atividades");
         assertThat(shell.hasHorizontalScroll()).isFalse();
     }
+
+    @Test
+    @DisplayName("deixa o cadastro sem rolagem horizontal no celular")
+    void shouldFitMobileScreen() {
+        useMobileScreen();
+
+        RegisterPage register = new RegisterPage(driver).open().enableAddress();
+
+        assertThat(register.hasHorizontalScroll()).isFalse();
+    }
 }
