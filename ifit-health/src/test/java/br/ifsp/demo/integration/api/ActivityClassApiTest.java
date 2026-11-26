@@ -396,6 +396,9 @@ class ActivityClassApiTest extends ApiTestBase {
         DbFixtures.insertEnrollmentActivity(enrollment, gymClass, new BigDecimal("120"), LocalDate.now(), null, true);
 
         Map<String, Object> body = validRequest();
+        body.put("sportId", SeedData.SPORT_WEIGHT_TRAINING.toString());
+        body.put("roomId", SeedData.ROOM_GYM.toString());
+        body.put("trainerId", SeedData.TRAINER_JOHN.toString());
         body.put("weekdays", List.of("MONDAY"));
         body.put("startTime", "12:00");
         body.put("endTime", "13:00");
