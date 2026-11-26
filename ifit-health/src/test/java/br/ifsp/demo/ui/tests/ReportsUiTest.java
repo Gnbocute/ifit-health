@@ -71,4 +71,15 @@ class ReportsUiTest extends UiTestBase {
         assertThat(page.activities()).singleElement().asString().startsWith(SeedData.SWIMMING_NAME);
         assertThat(page.cell(0, 4)).isEqualTo("R$ 180,00");
     }
+    
+    @Test
+    @DisplayName("mantém a mesma ocupação quando o filtro de dia seleciona a mesma atividade")
+    void shouldKeepOccupancyWithFilter() {
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, MARCH_1);
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, MARCH_1);
+
+        ReportsPage page = openReports().setPeriod(MARCH_1, MARCH_31).chooseWeekday("Segunda").generate().waitForResult();
+
+        assertThat(page.stat("Ocupação média")).isEqualTo("10.0%");
+    }
 }
