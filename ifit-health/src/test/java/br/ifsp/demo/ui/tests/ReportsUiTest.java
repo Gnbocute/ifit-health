@@ -94,4 +94,16 @@ class ReportsUiTest extends UiTestBase {
         assertThat(page.startDate()).isEqualTo("2026-11-01");
         assertThat(page.endDate()).isEqualTo("2026-11-21");
     }
+
+    @Test
+    @DisplayName("mantém relatórios sem rolagem horizontal no celular")
+    void shouldBeResponsive() {
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, MARCH_1);
+        ReportsPage page = openReports();
+        useMobileScreen();
+
+        page.setPeriod(MARCH_1, MARCH_31).generate().waitForResult();
+
+        assertThat(page.hasHorizontalScroll()).isFalse();
+    }
 }
