@@ -41,4 +41,12 @@ class ReportsUiTest extends UiTestBase {
         assertThat(page.cell(0, 4)).isEqualTo("R$ 360,00");
         assertThat(page.cell(0, 5)).isEqualTo("10.0%");
     }
+
+    @Test
+    @DisplayName("bloqueia data final anterior à inicial na tela de relatórios")
+    void shouldRejectInvalidPeriod() {
+        ReportsPage page = openReports().setPeriod(MARCH_31, MARCH_1).generate();
+
+        assertThat(page.errorBox()).isEqualTo("A data final deve ser igual ou posterior à data inicial.");
+    }
 }
