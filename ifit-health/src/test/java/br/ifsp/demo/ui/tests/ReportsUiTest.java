@@ -49,4 +49,15 @@ class ReportsUiTest extends UiTestBase {
 
         assertThat(page.errorBox()).isEqualTo("A data final deve ser igual ou posterior à data inicial.");
     }
+
+    @Test
+    @DisplayName("mostra tabela vazia quando a modalidade não tem atividades")
+    void shouldFilterBySport() {
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, MARCH_1);
+
+        ReportsPage page = openReports().setPeriod(MARCH_1, MARCH_31).chooseSport("Judô").generate().waitForResult();
+
+        assertThat(page.isEmpty()).isTrue();
+        assertThat(page.stat("Matriculados")).isEqualTo("0");
+    }
 }
