@@ -105,4 +105,13 @@ class EditActivityUiTest extends UiTestBase {
 
         assertThat(list.cell(SeedData.SWIMMING_NAME, 4)).isEqualTo("0/20");
     }
+
+    @Test
+    @DisplayName("mantém o formulário de edição sem rolagem horizontal no celular")
+    void shouldBeResponsive() {
+        ActivityFormPage form = openSwimming();
+        useMobileScreen();
+
+        assertThat(form.hasHorizontalScroll()).isFalse();
+    }
 }
