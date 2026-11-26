@@ -8,6 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,7 +72,7 @@ class ReportsUiTest extends UiTestBase {
         assertThat(page.activities()).singleElement().asString().startsWith(SeedData.SWIMMING_NAME);
         assertThat(page.cell(0, 4)).isEqualTo("R$ 180,00");
     }
-    
+
     @Test
     @DisplayName("mantém a mesma ocupação quando o filtro de dia seleciona a mesma atividade")
     void shouldKeepOccupancyWithFilter() {
@@ -81,5 +82,16 @@ class ReportsUiTest extends UiTestBase {
         ReportsPage page = openReports().setPeriod(MARCH_1, MARCH_31).chooseWeekday("Segunda").generate().waitForResult();
 
         assertThat(page.stat("Ocupação média")).isEqualTo("10.0%");
+    }
+
+    @Test
+    @DisplayName("começa com o mês atual no fuso local (Brasil, 22:30)")
+    void shouldUseLocalDateAsDefaultPeriod() {
+        simulateBrowserClock(Instant.parse("2026-11-22T01:30:00Z"), "America/Sao_Paulo");
+
+        ReportsPage page = openReports();
+
+        assertThat(page.startDate()).isEqualTo("2026-11-01");
+        assertThat(page.endDate()).isEqualTo("2026-11-21");
     }
 }
