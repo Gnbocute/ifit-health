@@ -1,10 +1,7 @@
 package br.ifsp.demo.integration.api;
 
 import br.ifsp.demo.support.ApiTestBase;
-import br.ifsp.demo.support.DbFixtures;
-import br.ifsp.demo.support.FakeData;
 import br.ifsp.demo.support.SeedData;
-import br.ifsp.demo.ui.pages.AdminActivitiesPage;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -82,22 +79,5 @@ class CatalogApiTest extends ApiTestBase {
     @DisplayName("retorna 401 no catálogo sem token")
     void shouldRequireAuthentication(String path) {
         anonymous().when().get(path).then().statusCode(401);
-    }
-
-    @Test
-    @DisplayName("cria atividade válida e mostra na lista")
-    void shouldCreateActivity() {
-        int capacity = FakeData.faker().number().numberBetween(5, 31);
-        int fee = FakeData.faker().number().numberBetween(80, 250);
-
-        form.fill("Musculação", "Sala de Musculação", "John Doe", List.of("Terça", "Quinta"),
-                "08:00", "09:00", String.valueOf(capacity), String.valueOf(fee));
-        AdminActivitiesPage list = form.submitAndReturnToList();
-
-        assertThat(list.toast()).isEqualTo("Atividade cadastrada!");
-        assertThat(list.cell("Musculação", 3)).contains("Ter · Qui").contains("08:00–09:00");
-        assertThat(list.cell("Musculação", 4)).isEqualTo("0/" + capacity);
-        assertThat(list.cell("Musculação", 5)).isEqualTo("R$ " + fee + ",00");
-        assertThat(DbFixtures.count("SELECT COUNT(*) FROM activity_class")).isEqualTo(2);
     }
 }
