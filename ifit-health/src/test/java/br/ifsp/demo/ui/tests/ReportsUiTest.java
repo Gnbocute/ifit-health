@@ -60,4 +60,15 @@ class ReportsUiTest extends UiTestBase {
         assertThat(page.isEmpty()).isTrue();
         assertThat(page.stat("Matriculados")).isEqualTo("0");
     }
+
+    @Test
+    @DisplayName("filtra o relatório por dia da semana na tela")
+    void shouldFilterByWeekday() {
+        DbFixtures.enrollNewCustomer(SeedData.SWIMMING_CLASS, SeedData.SWIMMING_FEE, MARCH_1);
+
+        ReportsPage page = openReports().setPeriod(MARCH_1, MARCH_31).chooseWeekday("Segunda").generate().waitForResult();
+
+        assertThat(page.activities()).singleElement().asString().startsWith(SeedData.SWIMMING_NAME);
+        assertThat(page.cell(0, 4)).isEqualTo("R$ 180,00");
+    }
 }
